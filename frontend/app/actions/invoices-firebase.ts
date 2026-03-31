@@ -387,23 +387,63 @@ export async function getInvoicePDFData(invoiceId: string) {
     const invoiceDoc = await getDoc(doc(collections.invoices, invoiceId))
     if (!invoiceDoc.exists()) return { data: null, error: 'Invoice not found' }
 
-    const invoice = { id: invoiceDoc.id, ...invoiceDoc.data() }
+    const invoice = { id: invoiceDoc.id, ...invoiceDoc.data() } as Invoice
 
     // Fetch invoice items
     const itemsSnap = await getDocs(
       query(collections.invoiceItems, where('invoice_id', '==', invoiceId))
     )
-    const items = itemsSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+    const items = itemsSnap.docs.map(d => ({ id: d.id, ...d.data() }) as InvoiceItem)
 
     // Fetch business details
     const businessId = await getBusinessId()
-    let business = null
+    let business: Record<string, any> | null = null
     if (businessId) {
       const bizDoc = await getDoc(doc(collections.businesses, businessId))
       if (bizDoc.exists()) business = { id: bizDoc.id, ...bizDoc.data() }
     }
 
-    return { data: { invoice, items, business }, error: null }
+    const data = {
+      businessName: business?.name || business?.business_name || '',
+      businessAddress: business?.address,
+      businessPhone: business?.phone,
+      businessEmail: business?.email,
+      businessGST: business?.gst_number,
+      businessLogo: business?.logo_url,
+      currencySymbol: business?.currency_symbol || '₹',
+      invoiceNumber: invoice.invoice_number,
+      invoiceDate: invoice.invoice_date,
+      dueDate: invoice.due_date,
+      customerName: invoice.customer_name || 'Walk-in Customer',
+      customerAddress: invoice.customer_address,
+      customerPhone: invoice.customer_phone,
+      customerGST: invoice.customer_gst,
+      items: items.map(item => ({
+        productName: item.product_name,
+        description: item.description,
+        quantity: item.quantity,
+        unit: item.unit,
+        price: item.price_per_unit,
+        tax: item.tax_amount,
+        discount: item.discount_amount,
+        total: item.total_amount,
+      })),
+      subtotal: invoice.subtotal,
+      taxRate: invoice.tax_rate,
+      taxAmount: invoice.tax_amount,
+      shippingAmount: invoice.shipping_amount,
+      otherCharges: invoice.other_charges,
+      discountAmount: invoice.discount_amount,
+      grandTotal: invoice.total_amount,
+      paymentMethod: invoice.payment_method,
+      paymentStatus: invoice.payment_status,
+      paidAmount: invoice.paid_amount,
+      notes: invoice.notes,
+      terms: invoice.terms_conditions,
+      paymentDetails: business?.payment_details,
+    }
+
+    return { data, error: null }
   } catch (error: any) {
     console.error('getInvoicePDFData', error)
     return { data: null, error: error.message }
