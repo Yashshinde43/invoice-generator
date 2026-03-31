@@ -1,10 +1,11 @@
 'use server'
 
-import { authSDK, collections, getUser } from '@/lib/firebase'
-import { setSessionCookie } from '@/lib/firebase/auth'
+import { collections, getUser, firebaseSDK, countDocs } from '@/lib/firebase'
+import { setSessionCookie, signUp } from '@/lib/firebase/auth'
 import { revalidatePath } from 'next/cache'
 
-const { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut: firebaseSignOut } = authSDK
+const { doc, getDoc, setDoc } = firebaseSDK
+
 
 export async function diagnoseAndFixAuth() {
   const results = {
@@ -58,7 +59,7 @@ export async function diagnoseAndFixAuth() {
     results.steps.push({ step: 3, message: 'Testing database connectivity...' })
 
     try {
-      const usersCount = await getCountDocs(collections.users) || await getCountDocs(collections.profiles)
+      const usersCount = await countDocs(collections.profiles)
       results.steps.push({ step: 3, status: 'success', message: `Database is operational. Total users: ${usersCount || 'unknown'}` })
     } catch (dbError) {
       results.steps.push({ step: 3, status: 'error', message: `Database connectivity check failed: ${dbError}` })
@@ -85,7 +86,8 @@ export async function createTestUser() {
     const testEmail = `test${Date.now()}@invoicebuilder.com`
     const testPassword = 'Test@123456'
 
-    const { user, error } = await createUserWithEmailAndPassword(testEmail, testPassword, { fullName: 'Test User' })
+    const { data, error } = await signUp(testEmail, testPassword, 'Test User')
+    const user = data?.user
 
     if (error) {
       results.steps.push({ step: 1, status: 'error', message: error })

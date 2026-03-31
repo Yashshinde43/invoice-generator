@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/lib/firebase'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
 
 export async function GET(request: NextRequest) {
   const results: any = { steps: [] }
@@ -18,7 +19,7 @@ export async function GET(request: NextRequest) {
     const testPassword = 'TestPassword123!'
 
     try {
-      await auth.createUserWithEmailAndPassword(testEmail, testPassword)
+      await createUserWithEmailAndPassword(auth, testEmail, testPassword)
       results.steps.push({
         step: 2,
         status: 'success',

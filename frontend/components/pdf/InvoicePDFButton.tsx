@@ -4,7 +4,7 @@ import React, { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Download, Printer, Loader2 } from 'lucide-react'
 import { getInvoicePDFData } from '@/app/actions/invoices-firebase'
-import { downloadInvoicePDF, mapFirebaseToInvoicePDFData } from '@/lib/pdf/invoice'
+import { downloadInvoicePDF } from '@/lib/pdf/invoice'
 import { toast } from '@/components/ui/use-toast'
 
 interface InvoicePDFButtonProps {
@@ -44,8 +44,7 @@ export function InvoicePDFButton({
       }
 
       if (result.data) {
-        const pdfData = mapFirebaseToInvoicePDFData(result.data)
-        await downloadInvoicePDF(pdfData, `Invoice_${invoiceNumber}.pdf`)
+        await downloadInvoicePDF(result.data, `Invoice_${invoiceNumber}.pdf`)
         toast({
           title: 'Success',
           description: 'Invoice PDF downloaded successfully',
@@ -80,8 +79,7 @@ export function InvoicePDFButton({
       if (result.data) {
         // Generate PDF blob
         const { generateInvoicePDFBlob } = await import('@/lib/pdf/invoice')
-        const pdfData = mapFirebaseToInvoicePDFData(result.data)
-        const blob = await generateInvoicePDFBlob(pdfData)
+        const blob = await generateInvoicePDFBlob(result.data)
 
         // Create object URL and open in new tab
         const url = URL.createObjectURL(blob)

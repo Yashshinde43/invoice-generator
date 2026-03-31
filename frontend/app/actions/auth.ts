@@ -1,79 +1,60 @@
 'use server'
 
-import { 
-  firestore, 
-  collections,
-  firebaseSDK,
-  authSDK,
-  auth 
-} from '@/lib/firebase'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
+import { signIn as firebaseSignIn, signUp as firebaseSignUp, signOut as firebaseSignOut, getCurrentUser } from '@/lib/firebase/auth'
+import { auth, firebaseSDK } from '@/lib/firebase'
+import { updateProfile } from 'firebase/auth'
 
 export async function signIn(state: unknown, formData: FormData) {
-  const authInstance = authSDK
-
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
   console.log('Attempting login for:', email)
 
-  const { data: userCredential, error } = await authInstance.signInWithEmailAndPassword(
-    email,
-    password
-  )
+  const { data, error } = await firebaseSignIn(email, password)
 
   if (error) {
-    console.error('Login error:', error.message)
-    return { error: error.message }
+    console.error('Login error:', error)
+    return { error }
   }
 
-  console.log('Login successful, user:', userCredential.user?.uid)
+  console.log('Login successful, user:', data?.user?.uid)
 
   revalidatePath('/', 'layout')
   redirect('/dashboard')
 }
 
 export async function signUp(state: unknown, formData: FormData) {
-  const authInstance = authSDK
-  const userAuth = auth
-
   const fullName = formData.get('name') as string
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
-  const { user: newUserCredential, error } = await authInstance.createUserWithEmailAndPassword(
-    email,
-    password
-  )
+  const { data, error } = await firebaseSignUp(email, password, fullName)
 
   if (error) {
-    return { error: error.message }
+    return { error }
   }
 
-  // Update user display name
+  // Update display name
   try {
-    await userAuth.updateUser({
-      displayName: fullName
-    })
+    const currentUser = auth.currentUser
+    if (currentUser) {
+      await updateProfile(currentUser, { displayName: fullName })
+    }
   } catch (updateError: any) {
     console.error('Error updating display name:', updateError.message)
   }
 
-  // Email confirmation disabled - user is automatically logged in
   revalidatePath('/', 'layout')
   redirect('/dashboard')
 }
 
 export async function signOut() {
-  const authInstance = authSDK
-  const userAuth = auth
-
-  const { error } = await authInstance.signOut()
+  const { error } = await firebaseSignOut()
 
   if (error) {
-    return { error: error.message }
+    return { error }
   }
 
   revalidatePath('/', 'layout')
@@ -81,9 +62,7 @@ export async function signOut() {
 }
 
 export async function getUser() {
-  const userAuth = auth
-  
-  const user = userAuth.currentUser
+  const user = auth.currentUser
 
   if (!user) {
     return { user: null, error: 'No authenticated user' }

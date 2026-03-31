@@ -3,7 +3,7 @@
 import { collections, firebaseSDK } from '@/lib/firebase'
 import { revalidatePath } from 'next/cache'
 
-const { getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where } = firebaseSDK
+const { getDoc, getDocs, addDoc, updateDoc, deleteDoc, query, where, doc } = firebaseSDK
 
 // Interface Purchase
 export interface Purchase {
@@ -73,10 +73,10 @@ export async function getPurchase(id: string): Promise<{ purchase: Purchase | nu
     }
     
     // Get purchase items - Firestore doesn't support joins for this pattern
-    const items = []
+    const items: PurchaseItem[] = []
     
     return {
-      purchase: { id: purchaseDoc.id, ...purchaseDoc.data() as Purchase },
+      purchase: { ...purchaseDoc.data() as Purchase, id: purchaseDoc.id },
       items: items || []
     }
   } catch (error: any) {

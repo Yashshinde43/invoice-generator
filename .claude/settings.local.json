@@ -21,7 +21,8 @@
       "Bash(do)",
       "Bash(sed -i \"s/import { getFirebaseAuth } from ''@\\\\/lib\\\\/firebase''/import { auth } from ''@\\\\/lib\\\\/firebase''/\" \"$f\")",
       "Bash(sed -i \"s/import { getFirebaseAuth } from \"\"@\\\\/lib\\\\/firebase\"\"/import { auth } from \"\"@\\\\/lib\\\\/firebase\"\"/\" \"$f\")",
-      "Bash(sed -i \"s/const auth = getFirebaseAuth\\(\\);//\" \"$f\")"
+      "Bash(sed -i \"s/const auth = getFirebaseAuth\\(\\);//\" \"$f\")",
+      "Bash(npm run:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

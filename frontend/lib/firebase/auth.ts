@@ -1,6 +1,6 @@
 import { auth } from '@/lib/firebase'
-import { onAuthStateChanged, User as FirebaseUser, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth'
-import { cookies, deleteCookie } from 'next/headers'
+import { onAuthStateChanged, User as FirebaseUser, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut as firebaseSignOut } from 'firebase/auth'
+import { cookies } from 'next/headers'
 
 // Sign up new user with email and password
 export async function signUp(email: string, password: string, fullName: string) {
@@ -59,7 +59,7 @@ export async function signIn(email: string, password: string) {
 // Sign out user and clear session
 export async function signOut() {
   try {
-    await signOut(auth)
+    await firebaseSignOut(auth)
     
     // Clear session cookie
     const cookieStore = await cookies()
@@ -183,7 +183,8 @@ export async function validateSession() {
     const token = customToken.replace('FirebaseCustomToken ', '')
     
     try {
-      const user = await auth.currentUser
+      const user = auth.currentUser
+      if (!user) throw new Error('No current user')
       const idToken = await user.getIdToken(true)
       
       return { user, idToken, valid: true }
@@ -198,9 +199,6 @@ export async function validateSession() {
         },
         body: JSON.stringify({
           uid: 'custom-verification',
-          email: testToken => {
-             // This is a placeholder - in production you'd call a backend API
-          }
         })
       })
       

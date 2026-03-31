@@ -1,11 +1,14 @@
 'use server'
 
 import {
-  firestore,
   collections,
-  auth
+  auth,
+  firebaseSDK
 } from '@/lib/firebase'
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth'
 import { revalidatePath } from 'next/cache'
+
+const { setDoc, doc } = firebaseSDK
 
 export async function diagnoseAndFixAuth() {
   // auth imported above
@@ -32,7 +35,7 @@ export async function diagnoseAndFixAuth() {
     results.steps.push({ step: 2, message: 'Testing login with credentials...' })
 
     try {
-      await auth.signInWithEmailAndPassword('chiragsinghchauhan3949323@gmail.com', 'chirag@123')
+      await signInWithEmailAndPassword(auth, 'chiragsinghchauhan3949323@gmail.com', 'chirag@123')
       results.steps.push({ step: 2, status: 'success', message: 'Login successful!', session: 'test' })
       results.success = true
       results.finalUser = { uid: 'test-user-id', email: 'chiragsinghchauhan3949323@gmail.com' }
@@ -62,7 +65,7 @@ export async function createTestUser() {
     const testEmail = `test${Date.now()}@invoicebuilder.com`
     const testPassword = 'Test@123456'
 
-    const userCredential = await auth.createUserWithEmailAndPassword(testEmail, testPassword)
+    const userCredential = await createUserWithEmailAndPassword(auth, testEmail, testPassword)
     const user = userCredential.user
 
     if (!user) {
