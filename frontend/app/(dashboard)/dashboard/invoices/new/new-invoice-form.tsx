@@ -109,7 +109,7 @@ export function NewInvoiceForm({ business, products, customers }: Props) {
     if (formValues.invoice_date) {
       setValue('due_date', dueDateStr(formValues.invoice_date))
     }
-  }, [formValues.invoice_date])
+  }, [formValues.invoice_date, setValue])
 
   const handleCustomerChange = (id: string) => {
     setSelectedCustId(id)
@@ -309,12 +309,12 @@ export function NewInvoiceForm({ business, products, customers }: Props) {
               <CardContent className="pt-0">
                 <div className="grid grid-cols-2 gap-x-8 gap-y-1.5 text-sm">
                   {[
-                    business?.address && [<MapPin className="h-3.5 w-3.5" />, [business.address, business.city, business.state, business.postal_code].filter(Boolean).join(', ')],
-                    business?.phone   && [<Phone   className="h-3.5 w-3.5" />, business.phone],
-                    business?.email   && [<Mail    className="h-3.5 w-3.5" />, business.email],
-                    business?.gst_number && [<Hash className="h-3.5 w-3.5" />, `GST: ${business.gst_number}`],
-                    business?.payment_details && [<CreditCard className="h-3.5 w-3.5" />, 'Bank details included'],
-                    business?.terms_conditions && [<FileText   className="h-3.5 w-3.5" />, 'Terms & conditions included'],
+                    business?.address && [<MapPin key="addr-icon" className="h-3.5 w-3.5" />, [business.address, business.city, business.state, business.postal_code].filter(Boolean).join(', ')],
+                    business?.phone   && [<Phone key="phone-icon"   className="h-3.5 w-3.5" />, business.phone],
+                    business?.email   && [<Mail key="email-icon"    className="h-3.5 w-3.5" />, business.email],
+                    business?.gst_number && [<Hash key="gst-icon" className="h-3.5 w-3.5" />, `GST: ${business.gst_number}`],
+                    business?.payment_details && [<CreditCard key="payment-icon" className="h-3.5 w-3.5" />, 'Bank details included'],
+                    business?.terms_conditions && [<FileText key="terms-icon"   className="h-3.5 w-3.5" />, 'Terms & conditions included'],
                   ].filter(Boolean).map((row: any, i) => (
                     <div key={i} className="flex items-center gap-1.5 text-primary-700">
                       <span className="text-primary-400 shrink-0">{row[0]}</span>

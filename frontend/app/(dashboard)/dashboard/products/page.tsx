@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import Image from "next/image";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -191,7 +192,7 @@ async function ProductsContent() {
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
                                 {product.image_url ? (
-                                  <img src={product.image_url} alt={product.name} className="w-full h-full object-cover rounded-lg" />
+                                  <Image src={product.image_url} alt={product.name} width={40} height={40} className="w-full h-full object-cover rounded-lg" />
                                 ) : (
                                   <Package className="h-5 w-5 text-gray-400" />
                                 )}
