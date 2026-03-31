@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { cookies, headers } from 'next/headers'
 import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
+import { SetupModal } from '@/components/setup/SetupModal'
 import { getUserBusiness } from '@/app/actions/business-firebase'
 import { firestore } from '@/lib/firebase'
 import { doc, getDoc } from 'firebase/firestore'
@@ -39,17 +40,12 @@ export default async function DashboardLayout({
 
   const business = await getUserBusiness()
 
-  // Redirect to setup if no business exists, unless already on setup page
   const headersList = await headers()
   const pathname = headersList.get('x-pathname') || ''
   const isSetupPage = pathname === '/dashboard/setup'
 
-  if (!business && !isSetupPage) {
-    redirect('/dashboard/setup')
-  }
-
   // On setup page, render without sidebar/header for a clean onboarding experience
-  if (isSetupPage && !business) {
+  if (isSetupPage) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100">
         {children}
@@ -68,6 +64,7 @@ export default async function DashboardLayout({
         />
         <main className="p-4 lg:p-8">{children}</main>
       </div>
+      {!business && <SetupModal />}
     </div>
   );
 }

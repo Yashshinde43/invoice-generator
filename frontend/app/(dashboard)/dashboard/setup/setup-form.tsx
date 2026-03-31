@@ -40,9 +40,10 @@ type BusinessData = {
 
 interface Props {
   initialData: BusinessData | null
+  onComplete?: () => void
 }
 
-export function SetupForm({ initialData }: Props) {
+export function SetupForm({ initialData, onComplete }: Props) {
   const isEditing = !!initialData
   const router = useRouter()
   const { toast } = useToast()
@@ -89,8 +90,13 @@ export function SetupForm({ initialData }: Props) {
             ? 'Your business details have been saved.'
             : "Everything is ready. Let's start invoicing.",
         })
-        router.push('/dashboard')
-        router.refresh()
+        if (onComplete) {
+          onComplete()
+          router.refresh()
+        } else {
+          router.push('/dashboard')
+          router.refresh()
+        }
       }
     })
   }

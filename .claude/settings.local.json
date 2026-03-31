@@ -22,7 +22,9 @@
       "Bash(sed -i \"s/import { getFirebaseAuth } from ''@\\\\/lib\\\\/firebase''/import { auth } from ''@\\\\/lib\\\\/firebase''/\" \"$f\")",
       "Bash(sed -i \"s/import { getFirebaseAuth } from \"\"@\\\\/lib\\\\/firebase\"\"/import { auth } from \"\"@\\\\/lib\\\\/firebase\"\"/\" \"$f\")",
       "Bash(sed -i \"s/const auth = getFirebaseAuth\\(\\);//\" \"$f\")",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(cat app/\\\\\\(dashboard\\\\\\)/dashboard/setup/page.tsx)",
+      "Bash(head -5 app/\\\\\\(dashboard\\\\\\)/dashboard/setup/setup-form.tsx)"
     ]
   },
   "enableAllProjectMcpServers": true,
