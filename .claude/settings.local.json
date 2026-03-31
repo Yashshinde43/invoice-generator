@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(npm run dev:*)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(npm list:*)",
+      "Bash(ls:*)",
+      "Bash(cp:*)",
+      "Bash(find /d/invoice-builder/frontend/app -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(find /d/invoice-builder/frontend/components -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(npm install:*)",
+      "WebFetch(domain:www.skywingcargopackers.in)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git stash:*)",
+      "Bash(git push:*)",
+      "Bash(for f:*)",
+      "Bash(do)",
+      "Bash(sed -i \"s/import { getFirebaseAuth } from ''@\\\\/lib\\\\/firebase''/import { auth } from ''@\\\\/lib\\\\/firebase''/\" \"$f\")",
+      "Bash(sed -i \"s/import { getFirebaseAuth } from \"\"@\\\\/lib\\\\/firebase\"\"/import { auth } from \"\"@\\\\/lib\\\\/firebase\"\"/\" \"$f\")",
+      "Bash(sed -i \"s/const auth = getFirebaseAuth\\(\\);//\" \"$f\")"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
+}
