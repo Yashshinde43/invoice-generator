@@ -8,7 +8,7 @@ export default function InvoicesPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Invoices</h1>
+          <h1 className="text-3xl font-serif font-normal text-gray-900 dark:text-slate-100">Invoices</h1>
           <p className="text-gray-500 mt-1">Create and manage sales invoices</p>
         </div>
         <Link href="/dashboard/invoices/new">

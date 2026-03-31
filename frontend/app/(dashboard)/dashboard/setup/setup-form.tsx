@@ -119,7 +119,7 @@ export function SetupForm({ initialData, onComplete }: Props) {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-600 mb-5 shadow-lg shadow-primary-200">
               <Building2 className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Welcome! Let&apos;s set up your store</h1>
+            <h1 className="text-3xl font-serif font-normal text-gray-900 dark:text-slate-100 tracking-tight">Welcome! Let&apos;s set up your store</h1>
             <p className="mt-2 text-gray-500 text-base">
               Fill in your business details once — they&apos;ll be pre-filled on every invoice you create.
             </p>

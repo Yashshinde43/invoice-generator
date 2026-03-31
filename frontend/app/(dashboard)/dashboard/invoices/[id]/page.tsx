@@ -47,7 +47,7 @@ async function InvoiceDetailContent({ id }: { id: string }) {
           </Link>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-2xl font-serif font-normal text-gray-900 dark:text-slate-100">
                 Invoice #{invoice.invoice_number}
               </h1>
               {getStatusBadge(invoice.status, invoice.payment_status)}

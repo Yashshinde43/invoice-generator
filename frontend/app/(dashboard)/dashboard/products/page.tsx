@@ -60,7 +60,7 @@ async function ProductsContent() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Products</h1>
+          <h1 className="text-3xl font-serif font-normal text-gray-900 dark:text-slate-100">Products</h1>
           <p className="text-gray-500 mt-1">Manage your inventory and product catalog</p>
         </div>
         <Button className="gap-2">

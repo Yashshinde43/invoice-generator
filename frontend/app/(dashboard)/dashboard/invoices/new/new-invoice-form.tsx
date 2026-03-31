@@ -278,7 +278,7 @@ export function NewInvoiceForm({ business, products, customers }: Props) {
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">New Invoice</h1>
+          <h1 className="text-3xl font-serif font-normal text-gray-900 dark:text-slate-100">New Invoice</h1>
           <p className="text-gray-500 mt-1">Your store details are pre-filled automatically</p>
         </div>
       </div>
