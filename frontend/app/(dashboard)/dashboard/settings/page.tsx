@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AppearanceSettings } from "@/components/settings/AppearanceSettings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -199,32 +200,7 @@ export default async function SettingsPage() {
             <CardContent className="space-y-6">
               <div className="space-y-3">
                 <Label>Theme</Label>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  {["Light", "Dark", "System"].map((theme, i) => (
-                    <button
-                      key={theme}
-                      className={`p-4 border rounded-lg text-left transition-colors ${
-                        i === 0 ? "border-primary-600 bg-primary-50" : "hover:bg-gray-50"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium">{theme}</span>
-                        {i === 0 && (
-                          <Badge variant="default" className="text-xs">
-                            Active
-                          </Badge>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-500">
-                        {i === 0
-                          ? "Always use light mode"
-                          : i === 1
-                          ? "Always use dark mode"
-                          : "Follow system preference"}
-                      </p>
-                    </button>
-                  ))}
-                </div>
+                <AppearanceSettings />
               </div>
               <Separator />
               <div className="grid gap-4 md:grid-cols-2">
