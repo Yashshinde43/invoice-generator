@@ -127,7 +127,7 @@ export function SetupForm({ initialData, onComplete }: Props) {
         )}
       </div>
 
-      <form ref={formRef} onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6 pb-24">
+      <form ref={formRef} onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
 
         {/* ── 1. Basic Information ── */}
         <Card className="border border-blue-100 shadow-sm">
@@ -338,12 +338,12 @@ export function SetupForm({ initialData, onComplete }: Props) {
         </Card>
 
         {/* ── Submit ── */}
-        <div className="sticky bottom-0 pt-4 pb-2 bg-gradient-to-t from-gray-50 via-gray-50/90 to-transparent -mx-4 px-4">
+        <div className="pt-4 pb-2 border-t border-slate-100 dark:border-white/[0.06]">
           <Button
             type="submit"
             size="lg"
             disabled={isPending}
-            className="w-full gap-2 h-12 text-base font-semibold bg-primary-600 hover:bg-primary-700 shadow-lg shadow-primary-200"
+            className="w-full gap-2 h-12 text-base font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/25"
           >
             {isPending ? (
               <>
