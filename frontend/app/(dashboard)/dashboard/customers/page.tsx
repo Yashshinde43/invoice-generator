@@ -383,7 +383,7 @@ async function CustomersContent() {
                           <TableCell className="font-medium">{invoice.invoice_number}</TableCell>
                           <TableCell>
                             <div>
-                              <p>{invoice.customer_name || invoice.customers?.name || 'Walk-in Customer'}</p>
+                              <p>{invoice.customer_name || 'Walk-in Customer'}</p>
                               {invoice.customer_phone && (
                                 <p className="text-xs text-gray-500">{invoice.customer_phone}</p>
                               )}
