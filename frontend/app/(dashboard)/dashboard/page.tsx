@@ -240,7 +240,7 @@ async function DashboardContent() {
                   <div key={invoice.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <p className="font-medium">{invoice.invoice_number}</p>
-                      <p className="text-sm text-gray-500">{invoice.customers?.name || invoice.customer_name || 'Walk-in Customer'}</p>
+                      <p className="text-sm text-gray-500">{invoice.customer_name || 'Walk-in Customer'}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-medium">{formatCurrency(invoice.total_amount)}</p>

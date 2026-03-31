@@ -53,7 +53,7 @@ async function InvoiceDetailContent({ id }: { id: string }) {
               {getStatusBadge(invoice.status, invoice.payment_status)}
             </div>
             <p className="text-gray-500 mt-0.5 text-sm">
-              {invoice.customer_name || invoice.customers?.name || 'Walk-in Customer'}
+              {invoice.customer_name || 'Walk-in Customer'}
             </p>
           </div>
         </div>
