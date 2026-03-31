@@ -148,7 +148,7 @@ export function onAuthStateChange(callback: (user: any) => void) {
 }
 
 // Set Firebase Session Cookie
-async function setSessionCookie(user: any) {
+export async function setSessionCookie(user: any) {
   try {
     const cookieStore = await cookies()
     

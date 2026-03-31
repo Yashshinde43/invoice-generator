@@ -1,9 +1,10 @@
 'use server'
 
-import { authSDK, collections } from '@/lib/firebase'
+import { authSDK, collections, getUser } from '@/lib/firebase'
+import { setSessionCookie } from '@/lib/firebase/auth'
 import { revalidatePath } from 'next/cache'
 
-const { getUser, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut: firebaseSignOut, setSessionCookie } = authSDK
+const { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut: firebaseSignOut } = authSDK
 
 export async function diagnoseAndFixAuth() {
   const results = {
