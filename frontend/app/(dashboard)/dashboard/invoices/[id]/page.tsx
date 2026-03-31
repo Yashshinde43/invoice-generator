@@ -9,7 +9,7 @@ import { InvoicePDF } from '@/components/pdf/InvoicePDF'
 import { InvoicePDFButton } from '@/components/pdf/InvoicePDFButton'
 
 interface InvoiceDetailPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 async function InvoiceDetailContent({ id }: { id: string }) {
@@ -76,7 +76,8 @@ async function InvoiceDetailContent({ id }: { id: string }) {
   )
 }
 
-export default function InvoiceDetailPage({ params }: InvoiceDetailPageProps) {
+export default async function InvoiceDetailPage({ params }: InvoiceDetailPageProps) {
+  const { id } = await params
   return (
     <Suspense
       fallback={
@@ -85,7 +86,7 @@ export default function InvoiceDetailPage({ params }: InvoiceDetailPageProps) {
         </div>
       }
     >
-      <InvoiceDetailContent id={params.id} />
+      <InvoiceDetailContent id={id} />
     </Suspense>
   )
 }

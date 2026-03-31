@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getInvoicePDFData } from '@/app/actions/invoices-firebase'
 import { generateInvoicePDFBase64 } from '@/lib/pdf/invoice'
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const result = await getInvoicePDFData(params.id)
+    const { id } = await params
+    const result = await getInvoicePDFData(id)
 
     if (result.error || !result.data) {
       return NextResponse.json({ error: result.error || 'Failed to generate PDF' }, { status: 400 })
