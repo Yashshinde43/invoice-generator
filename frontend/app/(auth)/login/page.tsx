@@ -1,44 +1,57 @@
 'use client'
 
 import Link from "next/link";
-import { useFormStatus } from "react-dom";
-import { useActionState } from "react";
 import { signIn } from "@/app/actions/auth-firebase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Mail, Lock, ArrowRight, AlertCircle } from "lucide-react";
-import { useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <Button type="submit" className="w-full gap-2" disabled={pending}>
-      {pending ? "Signing in..." : (
-        <>
-          Sign In
-          <ArrowRight className="h-4 w-4" />
-        </>
-      )}
-    </Button>
-  );
-}
+import { auth } from "@/lib/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [state, formAction] = useActionState(signIn, null);
+  const [error, setError] = useState<string | null>(null);
+  const [hint, setHint] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
-  useEffect(() => {
-    if (state?.error) {
-      toast({
-        variant: "destructive",
-        title: "Sign in failed",
-        description: state.error,
-      });
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setHint(null);
+    setPending(true);
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    try {
+      // 1. Sign in client-side so Firebase Auth SDK has a session (required for Storage uploads)
+      await signInWithEmailAndPassword(auth, email, password);
+
+      // 2. Call server action to set the httpOnly session cookie and redirect
+      const result = await signIn(null, formData);
+
+      if (result?.error) {
+        setError(result.error);
+        setHint(result.hint ?? null);
+        // Sign out client-side if server rejected (e.g. email not verified)
+        await auth.signOut();
+      }
+      // On success, server action redirects to /dashboard
+    } catch (err: any) {
+      const msg = err?.message ?? 'Sign in failed. Please try again.';
+      setError(msg);
+      toast({ variant: "destructive", title: "Sign in failed", description: msg });
+    } finally {
+      setPending(false);
     }
-  }, [state, toast]);
+  };
 
   return (
     <Card className="w-full max-w-md shadow-xl">
@@ -54,12 +67,12 @@ export default function LoginPage() {
         </div>
       </CardHeader>
       <CardContent>
-        {state?.error && (
+        {error && (
           <div className="mb-4 p-3 bg-danger-50 border border-danger-200 rounded-lg flex items-start gap-2">
             <AlertCircle className="h-5 w-5 text-danger-600 mt-0.5 flex-shrink-0" />
             <div className="flex-1">
-              <p className="text-sm text-danger-800">{state.error}</p>
-              {state.hint === 'signup' && (
+              <p className="text-sm text-danger-800">{error}</p>
+              {hint === 'signup' && (
                 <p className="text-xs text-danger-700 mt-1">
                   Don&apos;t have an account?{' '}
                   <Link href="/signup" className="font-semibold underline">
@@ -71,7 +84,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form action={formAction} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email Address</Label>
             <div className="relative">
@@ -107,7 +120,14 @@ export default function LoginPage() {
             </div>
             <p className="text-xs text-gray-500">Must be at least 6 characters long</p>
           </div>
-          <SubmitButton />
+          <Button type="submit" className="w-full gap-2" disabled={pending}>
+            {pending ? "Signing in..." : (
+              <>
+                Sign In
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </Button>
         </form>
 
         <div className="relative my-6">

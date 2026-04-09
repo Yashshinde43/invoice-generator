@@ -231,11 +231,8 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
       // Upload receipt image client-side first (Firebase Storage is a client SDK)
       let image_url = '';
       if (selectedImage) {
-        // Get businessId from cookie (same as server action does)
-        const uid = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('firebase-uid='))
-          ?.split('=')[1] ?? 'unknown';
+        const uid = auth.currentUser?.uid;
+        if (!uid) throw new Error('Not signed in. Please refresh and sign in again.');
         image_url = await uploadReceiptImage(selectedImage, uid);
       }
 
