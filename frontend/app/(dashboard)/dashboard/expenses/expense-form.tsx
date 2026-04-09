@@ -16,6 +16,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { createExpense } from "@/app/actions/expenses-firebase";
 import { useToast } from "@/hooks/use-toast";
+import { storage, storageSDK } from "@/lib/firebase";
 
 interface ExpenseFormProps {
   category: ExpenseCategory;
@@ -207,17 +208,37 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
     return true;
   };
 
+  const uploadReceiptImage = async (file: File, businessId: string): Promise<string> => {
+    const { storageRef, uploadBytes, getDownloadURL } = storageSDK;
+    const timestamp = Date.now();
+    const fileName = `expenses/${businessId}/${timestamp}_${file.name}`;
+    const ref = storageRef(storage, fileName);
+    await uploadBytes(ref, file);
+    return getDownloadURL(ref);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate before submitting
     if (!validateForm()) {
       return;
     }
-    
+
     setIsSubmitting(true);
 
     try {
+      // Upload receipt image client-side first (Firebase Storage is a client SDK)
+      let image_url = '';
+      if (selectedImage) {
+        // Get businessId from cookie (same as server action does)
+        const uid = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('firebase-uid='))
+          ?.split('=')[1] ?? 'unknown';
+        image_url = await uploadReceiptImage(selectedImage, uid);
+      }
+
       // Create FormData object for Firebase action
       const formDataObj = new FormData();
 
@@ -233,9 +254,9 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
       if (formData.reference?.trim()) formDataObj.append('reference', formData.reference);
       if (formData.notes?.trim()) formDataObj.append('notes', formData.notes);
 
-      // Add receipt image if selected
-      if (selectedImage) {
-        formDataObj.append('receipt_image', selectedImage);
+      // Pass the already-uploaded image URL
+      if (image_url) {
+        formDataObj.append('image_url', image_url);
       }
 
       // Add category-specific fields in nested structure
@@ -1266,7 +1287,7 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
                   {isSubmitting ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      Adding...
+                      {selectedImage ? "Uploading..." : "Adding..."}
                     </>
                   ) : (
                     <>

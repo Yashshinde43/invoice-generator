@@ -71,17 +71,10 @@ export async function getExpenses(): Promise<Expense[]> {
     querySnapshot.forEach((doc) => {
       const data = doc.data()
       if (data.is_active !== false) {
-        const expense = {
+        expenses.push({
           id: doc.id,
           ...data,
-        } as Expense
-        
-        // Debug: Log first few expenses with image URLs
-        if (expenses.length < 3) {
-          console.log('Retrieved expense', expense.id, 'with image_url:', expense.image_url)
-        }
-        
-        expenses.push(expense)
+        } as Expense)
       }
     })
 
@@ -142,66 +135,11 @@ export async function createExpense(formData: FormData): Promise<SuccessResponse
     const vendor = (formData.get('vendor') as string) || ''
     const reference = (formData.get('reference') as string) || ''
     const notes = (formData.get('notes') as string) || ''
-    const imageFile = formData.get('receipt_image') as File | null
+    // Image is uploaded client-side; we receive the download URL directly
+    const image_url = (formData.get('image_url') as string) || ''
 
     if (!category || !amount || !expense_date || !payment_method || !payment_status) {
       throw new Error('Missing required fields')
-    }
-
-    // Handle image upload if present
-    let image_url = ''
-    if (imageFile && imageFile.size > 0) {
-      try {
-        console.log('Starting image upload...', {
-          fileName: imageFile.name,
-          fileSize: imageFile.size,
-          fileType: imageFile.type,
-          businessId: businessId,
-          userId: userId
-        })
-        
-        // Import storage from the pre-configured firebase instance
-        const { storage, storageSDK } = await import('@/lib/firebase')
-        const { storageRef, uploadBytes, getDownloadURL } = storageSDK
-        
-        const timestamp = Date.now()
-        const fileName = `expenses/${businessId}/${timestamp}_${imageFile.name}`
-        const storageReference = storageRef(storage, fileName)
-        
-        console.log('Uploading to storage path:', fileName)
-        console.log('Storage bucket:', storage.app.options.storageBucket)
-        
-        const uploadResult = await uploadBytes(storageReference, imageFile)
-        console.log('Upload successful:', uploadResult.metadata)
-        
-        image_url = await getDownloadURL(storageReference)
-        console.log('Download URL generated successfully:', image_url)
-      } catch (error) {
-        console.error('Image upload error details:', {
-          error: error,
-          message: error instanceof Error ? error.message : 'Unknown error',
-          code: (error as any)?.code,
-          serverResponse: (error as any)?.serverResponse,
-          customData: (error as any)?.customData
-        })
-        
-        let errorMessage = 'Failed to upload receipt image.'
-        if (error instanceof Error) {
-          if (error.message.includes('storage/unknown')) {
-            errorMessage = 'Storage access error: Firebase Storage security rules may not be deployed. Please run "firebase deploy --only storage" or check Firebase Console > Storage > Rules.'
-          } else if (error.message.includes('storage/unauthorized')) {
-            errorMessage = 'Access denied: Please check Firebase Storage security rules in Firebase Console > Storage > Rules.'
-          } else if (error.message.includes('storage/object-not-found')) {
-            errorMessage = 'Storage path not found: Please verify the storage bucket configuration.'
-          } else if (error.message.includes('storage/retry-limit-exceeded')) {
-            errorMessage = 'Network error: Please check your internet connection and try again.'
-          } else {
-            errorMessage = error.message
-          }
-        }
-        
-        throw new Error(`${errorMessage} Please verify your Firebase Storage configuration and security rules.`)
-      }
     }
 
     const generateDescription = (): string => {
@@ -401,9 +339,6 @@ export async function createExpense(formData: FormData): Promise<SuccessResponse
     }
 
     const expenseRef = await addDoc(collections.expenses, expenseData)
-    
-    // Debug: Log the saved data with image URL
-    console.log('Expense created with image_url:', expenseData.image_url)
 
     // Revalidate paths
     revalidatePath('/dashboard/expenses')
