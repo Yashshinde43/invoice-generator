@@ -147,3 +147,40 @@ export function getStockStatus(currentStock: number, threshold: number): {
   }
   return { status: "ok", label: "In Stock", color: "text-success-600" };
 }
+
+// ============= Expense Category Helpers =============
+
+import { EXPENSE_CATEGORIES, ExpenseCategory } from "@/types";
+
+/**
+ * Get expense category label
+ */
+export function getExpenseCategoryLabel(category: ExpenseCategory): string {
+  const cat = EXPENSE_CATEGORIES.find(c => c.value === category);
+  return cat?.label || category;
+}
+
+/**
+ * Get expense category icon
+ */
+export function getExpenseCategoryIcon(category: ExpenseCategory): string {
+  const cat = EXPENSE_CATEGORIES.find(c => c.value === category);
+  return cat?.icon || "📋";
+}
+
+/**
+ * Format expense category for display
+ */
+export function formatExpenseCategory(category: ExpenseCategory): string {
+  return `${getExpenseCategoryIcon(category)} ${getExpenseCategoryLabel(category)}`;
+}
+
+/**
+ * Get all expense category options for forms
+ */
+export function getExpenseCategoryOptions() {
+  return EXPENSE_CATEGORIES.map(cat => ({
+    value: cat.value,
+    label: `${cat.icon} ${cat.label}`,
+  }));
+}

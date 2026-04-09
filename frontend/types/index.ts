@@ -189,18 +189,34 @@ export interface Payment {
 
 // ============= Expense Types =============
 
+export const EXPENSE_CATEGORIES = [
+  { value: "salary_wages", label: "Salary/Wages", icon: "💰" },
+  { value: "attendance", label: "Attendance/Bonus", icon: "👥" },
+  { value: "subscriptions", label: "Subscriptions", icon: "📱" },
+  { value: "office_supplies", label: "Office Supplies", icon: "📎" },
+  { value: "office_maintenance", label: "Office Maintenance", icon: "🔧" },
+  { value: "wifi_internet", label: "WiFi/Internet", icon: "📶" },
+  { value: "utilities", label: "Utilities", icon: "💡" },
+  { value: "rent", label: "Rent/Lease", icon: "🏢" },
+] as const;
+
+export type ExpenseCategory = typeof EXPENSE_CATEGORIES[number]["value"];
+
 export interface Expense {
   id: string;
   businessId: string;
-  categoryId?: string;
+  category: ExpenseCategory;
   description: string;
   amount: number;
-  date: Date;
+  expenseDate: Date;
   paymentMethod: string;
+  paymentStatus: "paid" | "unpaid" | "pending";
   reference?: string;
+  vendor?: string;
   attachment?: string;
   notes?: string;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 // ============= Report Types =============

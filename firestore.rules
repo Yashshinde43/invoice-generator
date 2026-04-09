@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Allow authenticated users to read and write their own data
+    match /profiles/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Allow authenticated users to manage their business
+    match /businesses/{businessId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to manage business collections
+    match /businesses/{businessId}/{collection}/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to manage expenses
+    match /expenses/{expenseId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Allow authenticated users to manage all business collections
+    match /{collection}/{document=**} {
+      allow read, write: if request.auth != null && collection != 'profiles';
+    }
+  }
+}

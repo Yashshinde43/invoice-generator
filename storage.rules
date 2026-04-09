@@ -1,0 +1,37 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules for Invoice Generator
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Match the specific bucket for this project
+    match /b/invoice-generator-f9f9a.firebasestorage.app/o {
+      
+      // Allow authenticated users to read and write expense receipts
+      match /expenses/{businessId}/{allPaths=**} {
+        allow read, write: if request.auth != null;
+      }
+      
+      // Allow authenticated users to read and write invoice files
+      match /invoices/{businessId}/{allPaths=**} {
+        allow read, write: if request.auth != null;
+      }
+      
+      // Allow authenticated users to read and write business files
+      match /business/{businessId}/{allPaths=**} {
+        allow read, write: if request.auth != null;
+      }
+      
+      // Allow authenticated users to read and write profile pictures
+      match /profiles/{userId}/{allPaths=**} {
+        allow read: if true; // Allow public read for profile pictures
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // Default rule - deny all other access
+      match /{allPaths=**} {
+        allow read, write: if false;
+      }
+    }
+  }
+}

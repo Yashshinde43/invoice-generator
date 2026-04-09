@@ -13,15 +13,17 @@ import {
   Settings,
   Menu,
   X,
+  Wallet,
 } from "lucide-react";
 import { useState } from "react";
 
 const navigation = [
+  { name: "Customers", href: "/dashboard/customers", icon: Users },
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Expenses", href: "/dashboard/expenses", icon: Wallet },
+  { name: "Invoices", href: "/dashboard/invoices", icon: FileText },
   { name: "Products", href: "/dashboard/products", icon: Package },
   { name: "Purchases", href: "/dashboard/purchases", icon: ShoppingCart },
-  { name: "Invoices", href: "/dashboard/invoices", icon: FileText },
-  { name: "Customers", href: "/dashboard/customers", icon: Users },
   { name: "Reports", href: "/dashboard/reports", icon: BarChart3 },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
