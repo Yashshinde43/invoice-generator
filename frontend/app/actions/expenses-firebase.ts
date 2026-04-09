@@ -1,5 +1,6 @@
 'use server'
 
+import { ExpenseCategory } from '@/types'
 import { collections, firebaseSDK } from '@/lib/firebase'
 import { revalidatePath } from 'next/cache'
 import { cookies } from 'next/headers'
@@ -22,7 +23,7 @@ async function getBusinessId(): Promise<string | null> {
 export interface Expense {
   id: string
   business_id: string
-  category: string
+  category: ExpenseCategory
   description: string
   amount: number
   expense_date: string
