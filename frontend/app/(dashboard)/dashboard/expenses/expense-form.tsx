@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,6 +95,16 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+
+  // Clean up image preview URL when component unmounts
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+      }
+    };
+  }, []); // Empty dependency array - only runs on unmount
 
   // Check if all required fields are filled for the current category
   const validateForm = (): boolean => {
@@ -327,8 +337,60 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
+    
+    // Clean up previous preview URL before creating new one
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl);
+    }
+    
     setSelectedImage(file);
     setFormData(prev => ({ ...prev, receiptImage: file }));
+    
+    // Create new preview URL if file is selected
+    if (file) {
+      // Check if it's an image
+      const isImage = file.type.startsWith('image/');
+      console.log('File selected:', file.name, 'Type:', file.type, 'Is image:', isImage, 'Size:', file.size);
+      
+      if (isImage) {
+        try {
+          const newPreviewUrl = URL.createObjectURL(file);
+          console.log('✅ Created preview URL:', newPreviewUrl);
+          setImagePreviewUrl(newPreviewUrl);
+          
+          // Test if the URL works by attempting to load it
+          const testImg = new Image();
+          testImg.onload = () => console.log('✅ Test load successful');
+          testImg.onerror = () => console.error('❌ Test load failed - URL:', newPreviewUrl);
+          testImg.src = newPreviewUrl;
+        } catch (error) {
+          console.error('❌ Error creating image preview:', error);
+          setImagePreviewUrl(null);
+        }
+      } else {
+        setImagePreviewUrl(null);
+        console.log('⚠️ File is not an image type');
+      }
+    } else {
+      setImagePreviewUrl(null);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    // Clean up preview URL
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl);
+    }
+    
+    setSelectedImage(null);
+    setImagePreviewUrl(null);
+    setFormData(prev => ({ ...prev, receiptImage: null }));
+    
+    // Reset the file input
+    const fileInput = document.getElementById('receipt_image') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
   };
 
   // Render category-specific fields
@@ -1045,12 +1107,77 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
                     className="mt-1 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Upload receipt image (JPG, PNG, PDF) - Required
+                    Upload receipt image (JPG, PNG) - Required
                   </p>
+                  
+                   {/* Image Preview Section - ALWAYS show when file is selected */}
                   {selectedImage && (
-                    <p className="text-xs text-green-600 mt-1">
-                      Selected: {selectedImage.name}
-                    </p>
+                    <div className="mt-4 space-y-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      {/* File name */}
+                      <p className="text-xs text-green-600 font-medium">
+                        ✓ Selected: {selectedImage.name}
+                      </p>
+                      
+                      {/* Debug info */}
+                      <p className="text-xs text-gray-500">
+                        Type: {selectedImage.type || 'unknown'} | Size: {(selectedImage.size / 1024).toFixed(1)} KB
+                      </p>
+                      
+                      {/* Image Preview - show for image files only */}
+                      {imagePreviewUrl && selectedImage?.type?.startsWith('image/') && (
+                        <div className="flex items-center gap-3">
+                          <div className="relative inline-block group flex-shrink-0">
+                            <div className="relative">
+                              <img 
+                                src={imagePreviewUrl} 
+                                alt="Receipt preview" 
+                                className="max-w-xs max-h-32 rounded-md shadow-sm border border-gray-300 object-contain"
+                                onLoad={() => console.log('✅ Image loaded successfully:', imagePreviewUrl)}
+                              />
+                              
+                              {/* Remove button */}
+                              <button
+                                type="button"
+                                onClick={handleRemoveImage}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 z-10"
+                                aria-label="Remove image"
+                                title="Remove image"
+                              >
+                                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Show placeholder for non-image files or if preview not available */}
+                      {(!imagePreviewUrl || !selectedImage?.type?.startsWith('image/')) && (
+                        <div className="flex items-center gap-3">
+                          <div className="relative inline-block group flex-shrink-0">
+                            <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16 flex items-center justify-center">
+                              <svg className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                              </svg>
+                            </div>
+                            
+                            {/* Remove button for non-image files */}
+                            <button
+                              type="button"
+                              onClick={handleRemoveImage}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 z-10"
+                              aria-label="Remove file"
+                              title="Remove file"
+                            >
+                              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                           </div>
+                         </div>
+                       )}
+                    </div>
                   )}
                 </div>
               </CardContent>

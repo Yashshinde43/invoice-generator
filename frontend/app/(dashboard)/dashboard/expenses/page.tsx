@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -70,6 +71,7 @@ function ExpensesContent() {
   const [selectedYear, setSelectedYear] = useState("all");
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   // Generate options dynamically
   const currentYear = new Date().getFullYear();
@@ -172,6 +174,11 @@ function ExpensesContent() {
     setSelectedExpense(null);
   };
 
+  const handleNavigateToNewExpense = () => {
+    setIsNavigating(true);
+    router.push("/dashboard/expenses/new");
+  };
+
   return (
     <div className="space-y-6 pb-12">
       {/* Page Header */}
@@ -250,12 +257,14 @@ function ExpensesContent() {
               <CardDescription>Track your business expenses and costs</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Link href="/dashboard/expenses/new">
-                <Button size="sm" className="gap-2">
+              <Button size="sm" className="gap-2" onClick={handleNavigateToNewExpense} disabled={isNavigating}>
+                {isNavigating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
                   <Plus className="h-4 w-4" />
-                  New Expense
-                </Button>
-              </Link>
+                )}
+                New Expense
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -426,12 +435,14 @@ function ExpensesContent() {
                   : "Get started by adding your first expense."
                 }
               </p>
-              <Link href="/dashboard/expenses/new">
-                <Button className="gap-2">
+              <Button className="gap-2" onClick={handleNavigateToNewExpense} disabled={isNavigating}>
+                {isNavigating ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
                   <Plus className="h-4 w-4" />
-                  New Expense
-                </Button>
-              </Link>
+                )}
+                New Expense
+              </Button>
             </div>
           )}
         </CardContent>
