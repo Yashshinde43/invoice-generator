@@ -5,7 +5,7 @@ const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-eval' 'unsafe-inline';
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data: https://firebasestorage.googleapis.com https://*.googleapis.com https://*.google.com;
+  img-src 'self' blob: data: https://firebasestorage.googleapis.com https://*.googleapis.com https://*.google.com;
   font-src 'self' data:;
   connect-src 'self' https://firebasestorage.googleapis.com https://*.googleapis.com https://*.google.com;
   frame-ancestors 'none';

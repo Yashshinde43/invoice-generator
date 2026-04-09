@@ -1,12 +1,21 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { EXPENSE_CATEGORIES } from "@/types";
-import { Wallet, Plus } from "lucide-react";
+import { Wallet, Plus, Loader2 } from "lucide-react";
 
 export default function NewExpensePage() {
+  const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState<string | null>(null);
+
+  const handleCategoryClick = (category: string) => {
+    setIsNavigating(category);
+    router.push(`/dashboard/expenses/${category}`);
+  };
+
   return (
     <div className="space-y-6 pb-12">
       {/* Page header */}
@@ -40,24 +49,31 @@ export default function NewExpensePage() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {EXPENSE_CATEGORIES.map((cat) => (
-              <Link href={`/dashboard/expenses/${cat.value}`} key={cat.value}>
-                <div className="p-6 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-all hover:shadow-md cursor-pointer group h-full">
-                  <div className="flex items-center gap-4">
-                    <span className="text-4xl group-hover:scale-110 transition-transform bg-gray-100 dark:bg-white/10 rounded-lg p-3">
-                      {cat.icon}
-                    </span>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg text-gray-900 dark:text-slate-100">
-                        {cat.label}
-                      </h3>
-                      <p className="text-sm text-gray-500 dark:text-slate-500 mt-1">
-                        Click to add {cat.label.toLowerCase()} expense
-                      </p>
-                    </div>
-                    <Plus className="h-5 w-5 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-slate-300 transition-colors flex-shrink-0" />
+              <div
+                key={cat.value}
+                className="p-6 border border-gray-200 dark:border-white/10 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 transition-all hover:shadow-md cursor-pointer group h-full relative"
+                onClick={() => handleCategoryClick(cat.value)}
+              >
+                {isNavigating === cat.value && (
+                  <div className="absolute inset-0 bg-white/50 dark:bg-gray-900/50 rounded-lg flex items-center justify-center z-10">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary-600 dark:text-primary-400" />
                   </div>
+                )}
+                <div className="flex items-center gap-4">
+                  <span className="text-4xl group-hover:scale-110 transition-transform bg-gray-100 dark:bg-white/10 rounded-lg p-3">
+                    {cat.icon}
+                  </span>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg text-gray-900 dark:text-slate-100">
+                      {cat.label}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-slate-500 mt-1">
+                      Click to add {cat.label.toLowerCase()} expense
+                    </p>
+                  </div>
+                  <Plus className="h-5 w-5 text-gray-400 group-hover:text-primary-600 dark:group-hover:text-slate-300 transition-colors flex-shrink-0" />
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         </CardContent>

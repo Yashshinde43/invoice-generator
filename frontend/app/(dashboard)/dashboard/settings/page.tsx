@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Building, Receipt, Palette, Database, Bell, CheckCircle2 } from "lucide-react";
+import { Settings, Building, Receipt, Palette, Database, Bell, CheckCircle2, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { InvoiceTemplatePreview } from "@/components/invoice/InvoiceTemplatePreview";
 import { getUserBusiness } from "@/app/actions/business-firebase";
 

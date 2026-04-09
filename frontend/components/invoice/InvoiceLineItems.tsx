@@ -130,7 +130,7 @@ export function InvoiceLineItems({
       <CardContent className="p-6">
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Line Items</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Line Items</h3>
             {!readonly && (
               <Button type="button" variant="outline" size="sm" onClick={addLineItem} className="gap-2">
                 <Plus className="h-4 w-4" />
@@ -141,7 +141,7 @@ export function InvoiceLineItems({
 
           {/* Column headers */}
           {items.length > 0 && (
-            <div className="hidden md:grid md:grid-cols-12 gap-2 text-xs font-medium text-gray-500 px-1">
+            <div className="hidden md:grid md:grid-cols-12 gap-2 text-xs font-medium text-gray-500 dark:text-slate-400 px-1">
               <div className="col-span-4">Product / Description</div>
               <div className="col-span-2 text-right">Price (₹)</div>
               <div className="col-span-1 text-right">Qty</div>
@@ -153,10 +153,10 @@ export function InvoiceLineItems({
           )}
 
           {items.length === 0 ? (
-            <div className="text-center py-12 border-2 border-dashed rounded-lg">
-              <Package className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p className="text-gray-500 mb-1">No items added</p>
-              <p className="text-xs text-gray-400 mb-4">
+            <div className="text-center py-12 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+              <Package className="h-12 w-12 mx-auto mb-4 text-gray-300 dark:text-slate-500" />
+              <p className="text-gray-500 dark:text-slate-400 mb-1">No items added</p>
+              <p className="text-xs text-gray-400 dark:text-slate-500 mb-4">
                 Add from your product catalog or enter item details manually
               </p>
               {!readonly && (
@@ -175,7 +175,7 @@ export function InvoiceLineItems({
                 return (
                   <div
                     key={item.id}
-                    className="grid grid-cols-1 md:grid-cols-12 gap-2 p-3 rounded-lg border border-gray-200 bg-gray-50"
+                    className="grid grid-cols-1 md:grid-cols-12 gap-2 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/70"
                   >
                     {/* Product / Name */}
                     <div className="col-span-1 md:col-span-4 space-y-1">
@@ -184,15 +184,15 @@ export function InvoiceLineItems({
                           value={item.product_id || '__manual__'}
                           onValueChange={(v) => handleProductChange(index, v)}
                         >
-                          <SelectTrigger className="h-8 text-xs bg-white">
+                          <SelectTrigger className="h-8 text-xs bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-slate-100">
                             <SelectValue placeholder="Select product or manual" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="__manual__">✏️ Enter manually</SelectItem>
                             {products.map((p) => (
                               <SelectItem key={p.id} value={p.id}>
-                                <span className="font-medium">{p.name}</span>
-                                <span className="text-xs text-gray-400 ml-2">
+                                <span className="font-medium text-gray-900 dark:text-slate-100">{p.name}</span>
+                                <span className="text-xs text-gray-400 dark:text-slate-500 ml-2">
                                   {formatCurrency(p.selling_price)}
                                 </span>
                               </SelectItem>
@@ -207,7 +207,7 @@ export function InvoiceLineItems({
                         value={item.product_name}
                         onChange={(e) => updateLineItem(index, 'product_name', e.target.value)}
                         disabled={readonly}
-                        className="h-8 text-sm bg-white"
+                        className="h-8 text-sm bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-slate-100"
                       />
 
                       <Input
@@ -215,7 +215,7 @@ export function InvoiceLineItems({
                         value={item.description || ''}
                         onChange={(e) => updateLineItem(index, 'description', e.target.value)}
                         disabled={readonly}
-                        className="h-7 text-xs bg-white text-gray-500"
+                        className="h-7 text-xs bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-slate-400"
                       />
 
                       {item.product_id && getStockBadge(item.product_id)}
@@ -223,9 +223,9 @@ export function InvoiceLineItems({
 
                     {/* Price */}
                     <div className="col-span-1 md:col-span-2">
-                      <Label className="text-xs text-gray-500 md:hidden">Price (₹)</Label>
+                      <Label className="text-xs text-gray-500 dark:text-slate-400 md:hidden">Price (₹)</Label>
                       {readonly ? (
-                        <p className="text-sm text-right">{formatCurrency(item.price_per_unit)}</p>
+                        <p className="text-sm text-right text-gray-900 dark:text-slate-100">{formatCurrency(item.price_per_unit)}</p>
                       ) : (
                         <Input
                           type="number"
@@ -235,16 +235,16 @@ export function InvoiceLineItems({
                           onChange={(e) =>
                             updateLineItem(index, 'price_per_unit', parseFloat(e.target.value) || 0)
                           }
-                          className="h-8 text-sm text-right bg-white"
+                          className="h-8 text-sm text-right bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-slate-100"
                         />
                       )}
                     </div>
 
                     {/* Quantity */}
                     <div className="col-span-1 md:col-span-1">
-                      <Label className="text-xs text-gray-500 md:hidden">Qty</Label>
+                      <Label className="text-xs text-gray-500 dark:text-slate-400 md:hidden">Qty</Label>
                       {readonly ? (
-                        <p className="text-sm text-right">{item.quantity}</p>
+                        <p className="text-sm text-right text-gray-900 dark:text-slate-100">{item.quantity}</p>
                       ) : (
                         <Input
                           type="number"
@@ -254,21 +254,21 @@ export function InvoiceLineItems({
                           onChange={(e) =>
                             updateLineItem(index, 'quantity', parseInt(e.target.value) || 1)
                           }
-                          className="h-8 text-sm text-right bg-white"
+                          className="h-8 text-sm text-right bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-slate-100"
                         />
                       )}
                     </div>
 
                     {/* Unit */}
                     <div className="col-span-1 md:col-span-1">
-                      <Label className="text-xs text-gray-500 md:hidden">Unit</Label>
+                      <Label className="text-xs text-gray-500 dark:text-slate-400 md:hidden">Unit</Label>
                       {readonly ? (
-                        <p className="text-sm text-center">{item.unit}</p>
+                        <p className="text-sm text-center text-gray-900 dark:text-slate-100">{item.unit}</p>
                       ) : (
                         <Input
                           value={item.unit}
                           onChange={(e) => updateLineItem(index, 'unit', e.target.value)}
-                          className="h-8 text-sm text-center bg-white"
+                          className="h-8 text-sm text-center bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-slate-100"
                           placeholder="pcs"
                         />
                       )}
@@ -276,9 +276,9 @@ export function InvoiceLineItems({
 
                     {/* Discount */}
                     <div className="col-span-1 md:col-span-2">
-                      <Label className="text-xs text-gray-500 md:hidden">Discount (₹)</Label>
+                      <Label className="text-xs text-gray-500 dark:text-slate-400 md:hidden">Discount (₹)</Label>
                       {readonly ? (
-                        <p className="text-sm text-right">
+                        <p className="text-sm text-right text-gray-900 dark:text-slate-100">
                           {item.discount_amount > 0 ? formatCurrency(item.discount_amount) : '-'}
                         </p>
                       ) : (
@@ -290,7 +290,7 @@ export function InvoiceLineItems({
                           onChange={(e) =>
                             updateLineItem(index, 'discount_amount', parseFloat(e.target.value) || 0)
                           }
-                          className="h-8 text-sm text-right bg-white"
+                          className="h-8 text-sm text-right bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-slate-100"
                           placeholder="0"
                         />
                       )}
@@ -298,7 +298,7 @@ export function InvoiceLineItems({
 
                     {/* Line Total */}
                     <div className="col-span-1 md:col-span-1 flex items-center justify-end">
-                      <p className="text-sm font-semibold text-gray-900">{formatCurrency(lineTotal)}</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{formatCurrency(lineTotal)}</p>
                     </div>
 
                     {/* Remove */}
@@ -323,9 +323,9 @@ export function InvoiceLineItems({
 
           {/* Subtotal footer */}
           {items.length > 0 && (
-            <div className="flex justify-between text-sm pt-3 border-t">
-              <span className="text-gray-500">{items.length} item{items.length > 1 ? 's' : ''}</span>
-              <span className="font-semibold">
+            <div className="flex justify-between text-sm pt-3 border-t border-gray-200 dark:border-gray-700">
+              <span className="text-gray-500 dark:text-slate-400">{items.length} item{items.length > 1 ? 's' : ''}</span>
+              <span className="font-semibold text-gray-900 dark:text-slate-100">
                 Subtotal: {formatCurrency(items.reduce((s, item) => s + getLineTotal(item), 0))}
               </span>
             </div>

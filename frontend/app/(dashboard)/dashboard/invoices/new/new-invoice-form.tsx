@@ -290,17 +290,17 @@ export function NewInvoiceForm({ business, products, customers }: Props) {
           <div className="lg:col-span-2 space-y-6">
 
             {/* ── Store Info (read-only, from setup) ── */}
-            <Card className="border-primary-200 bg-primary-50/40">
+            <Card className="border-primary-200 dark:border-primary-800 bg-primary-50/40 dark:bg-primary-950/20">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-primary-600" />
-                    <CardTitle className="text-sm font-semibold text-primary-800">
+                    <Building2 className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                    <CardTitle className="text-sm font-semibold text-primary-800 dark:text-primary-300">
                       From — {business?.name || 'My Business'}
                     </CardTitle>
                   </div>
                   <Link href="/dashboard/setup">
-                    <Badge variant="outline" className="gap-1 text-xs text-primary-600 border-primary-300 hover:bg-primary-100 cursor-pointer">
+                    <Badge variant="outline" className="gap-1 text-xs text-primary-600 dark:text-primary-400 border-primary-300 dark:border-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/40 cursor-pointer">
                       <ExternalLink className="h-3 w-3" /> Edit Store
                     </Badge>
                   </Link>
@@ -316,14 +316,14 @@ export function NewInvoiceForm({ business, products, customers }: Props) {
                     business?.payment_details && [<CreditCard key="payment-icon" className="h-3.5 w-3.5" />, 'Bank details included'],
                     business?.terms_conditions && [<FileText key="terms-icon"   className="h-3.5 w-3.5" />, 'Terms & conditions included'],
                   ].filter(Boolean).map((row: any, i) => (
-                    <div key={i} className="flex items-center gap-1.5 text-primary-700">
-                      <span className="text-primary-400 shrink-0">{row[0]}</span>
-                      <span className="text-xs truncate">{row[1]}</span>
+                    <div key={i} className="flex items-center gap-1.5 text-primary-700 dark:text-primary-400">
+                      <span className="text-primary-400 dark:text-primary-300 shrink-0">{row[0]}</span>
+                      <span className="text-xs truncate text-primary-700 dark:text-primary-400">{row[1]}</span>
                     </div>
                   ))}
                 </div>
                 {!business && (
-                  <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-md px-3 py-2">
+                  <p className="text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-md px-3 py-2">
                     No store set up yet.{' '}
                     <Link href="/dashboard/setup" className="underline font-medium">Set up your store</Link>
                     {' '}to pre-fill invoice details.
@@ -343,11 +343,11 @@ export function NewInvoiceForm({ business, products, customers }: Props) {
                   value={selectedCustId || 'walk-in'}
                   onValueChange={v => v === 'walk-in' ? handleWalkIn() : handleCustomerChange(v)}
                 >
-                  <SelectTrigger><SelectValue placeholder="Select customer…" /></SelectTrigger>
+                  <SelectTrigger className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-slate-100"><SelectValue placeholder="Select customer…" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="walk-in">— Walk-in / Manual Entry —</SelectItem>
                     {customers.map(c => (
-                      <SelectItem key={c.id} value={c.id}>
+                      <SelectItem key={c.id} value={c.id} className="text-gray-900 dark:text-slate-100">
                         {c.name}{c.phone ? ` · ${c.phone}` : ''}
                       </SelectItem>
                     ))}
@@ -360,20 +360,20 @@ export function NewInvoiceForm({ business, products, customers }: Props) {
                   <div className="md:col-span-2">
                     <Label htmlFor="customer_name">Customer Name <span className="text-red-500">*</span></Label>
                     <Input id="customer_name" placeholder="Full name or company" {...register('customer_name')}
-                      className={errors.customer_name ? 'border-red-500 mt-1' : 'mt-1'} />
-                    {errors.customer_name && <p className="text-xs text-red-500 mt-1">{errors.customer_name.message}</p>}
+                      className={`mt-1 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-slate-100 ${errors.customer_name ? 'border-red-500' : ''}`} />
+                    {errors.customer_name && <p className="text-xs text-red-500 dark:text-red-400 mt-1">{errors.customer_name.message}</p>}
                   </div>
                   <div>
                     <Label htmlFor="customer_phone">Phone</Label>
-                    <Input id="customer_phone" placeholder="+91 98765 43210" {...register('customer_phone')} className="mt-1" />
+                    <Input id="customer_phone" placeholder="+91 98765 43210" {...register('customer_phone')} className="mt-1 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-slate-100" />
                   </div>
                   <div>
                     <Label htmlFor="customer_gst">GST Number</Label>
-                    <Input id="customer_gst" placeholder="22AAAAA0000A1Z5" {...register('customer_gst')} className="mt-1 font-mono text-sm" />
+                    <Input id="customer_gst" placeholder="22AAAAA0000A1Z5" {...register('customer_gst')} className="mt-1 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-slate-100 font-mono text-sm" />
                   </div>
                   <div className="md:col-span-2">
                     <Label htmlFor="customer_address">Address</Label>
-                    <Input id="customer_address" placeholder="Street, City, State" {...register('customer_address')} className="mt-1" />
+                    <Input id="customer_address" placeholder="Street, City, State" {...register('customer_address')} className="mt-1 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-slate-100" />
                   </div>
                 </div>
               </CardContent>
@@ -468,42 +468,42 @@ export function NewInvoiceForm({ business, products, customers }: Props) {
                 {/* Totals breakdown */}
                 <div className="space-y-1.5 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Subtotal</span>
-                    <span>{formatCurrency(totals.subtotal)}</span>
+                    <span className="text-gray-500 dark:text-slate-400">Subtotal</span>
+                    <span className="text-gray-900 dark:text-slate-100">{formatCurrency(totals.subtotal)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Tax ({formValues.tax_rate}%)</span>
-                    <span>{formatCurrency(totals.tax_amount)}</span>
+                    <span className="text-gray-500 dark:text-slate-400">Tax ({formValues.tax_rate}%)</span>
+                    <span className="text-gray-900 dark:text-slate-100">{formatCurrency(totals.tax_amount)}</span>
                   </div>
                   {totals.shipping_amount > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Shipping</span>
-                      <span>{formatCurrency(totals.shipping_amount)}</span>
+                      <span className="text-gray-500 dark:text-slate-400">Shipping</span>
+                      <span className="text-gray-900 dark:text-slate-100">{formatCurrency(totals.shipping_amount)}</span>
                     </div>
                   )}
                   {totals.other_charges > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Other</span>
-                      <span>{formatCurrency(totals.other_charges)}</span>
+                      <span className="text-gray-500 dark:text-slate-400">Other</span>
+                      <span className="text-gray-900 dark:text-slate-100">{formatCurrency(totals.other_charges)}</span>
                     </div>
                   )}
                   {totals.discount_amount > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Discount</span>
-                      <span className="text-red-500">− {formatCurrency(totals.discount_amount)}</span>
+                      <span className="text-gray-500 dark:text-slate-400">Discount</span>
+                      <span className="text-red-500 dark:text-red-400">− {formatCurrency(totals.discount_amount)}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="flex justify-between items-center font-bold text-base border-t pt-3">
-                  <span>Grand Total</span>
-                  <span className="text-primary-600 text-lg">{formatCurrency(totals.total_amount)}</span>
+                <div className="flex justify-between items-center font-bold text-base border-t border-gray-200 dark:border-gray-700 pt-3">
+                  <span className="text-gray-900 dark:text-slate-100">Grand Total</span>
+                  <span className="text-primary-600 dark:text-primary-400 text-lg">{formatCurrency(totals.total_amount)}</span>
                 </div>
 
                 {totals.profit_amount > 0 && (
-                  <div className="flex justify-between text-xs text-gray-400">
+                  <div className="flex justify-between text-xs text-gray-400 dark:text-slate-500">
                     <span>Est. Profit</span>
-                    <span className="text-green-600 font-medium">{formatCurrency(totals.profit_amount)}</span>
+                    <span className="text-green-600 dark:text-green-500 font-medium">{formatCurrency(totals.profit_amount)}</span>
                   </div>
                 )}
 
@@ -523,20 +523,20 @@ export function NewInvoiceForm({ business, products, customers }: Props) {
                 </Button>
 
                 <Button type="button" variant="ghost" disabled={busy}
-                  className="w-full text-gray-500" onClick={() => router.back()}>
+                  className="w-full text-gray-500 dark:text-slate-400" onClick={() => router.back()}>
                   Cancel
                 </Button>
 
                 {/* What's auto-included reminder */}
-                <div className="rounded-lg bg-gray-50 border border-gray-100 p-3 space-y-1">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Auto-included from store</p>
+                <div className="rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 p-3 space-y-1">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Auto-included from store</p>
                   {[
                     business?.name            && `✓ ${business.name}`,
                     business?.gst_number      && `✓ GST ${business.gst_number}`,
                     business?.payment_details && '✓ Bank / UPI details',
                     business?.terms_conditions && '✓ Terms & conditions',
                   ].filter(Boolean).map((line: any, i) => (
-                    <p key={i} className="text-xs text-gray-500">{line}</p>
+                    <p key={i} className="text-xs text-gray-500 dark:text-slate-500">{line}</p>
                   ))}
                 </div>
 
