@@ -16,7 +16,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { createExpense } from "@/app/actions/expenses-firebase";
 import { useToast } from "@/hooks/use-toast";
-import { storage, storageSDK } from "@/lib/firebase";
+import { auth, storage, storageSDK } from "@/lib/firebase";
 
 interface ExpenseFormProps {
   category: ExpenseCategory;
