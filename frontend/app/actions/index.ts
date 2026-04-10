@@ -22,16 +22,6 @@ export {
   type Product,
 } from './products-firebase'
 
-// Customer actions
-export {
-  getCustomers,
-  getCustomer,
-  createCustomer,
-  updateCustomer,
-  deleteCustomer,
-  searchCustomers,
-} from './customers-firebase'
-
 // Invoice actions
 export {
   getInvoices,

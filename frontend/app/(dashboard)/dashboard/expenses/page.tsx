@@ -72,6 +72,7 @@ function ExpensesContent() {
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   // Generate options dynamically
   const currentYear = new Date().getFullYear();
@@ -164,6 +165,15 @@ function ExpensesContent() {
     return matchesSearch && matchesCategory && matchesStatus && matchesDate;
   });
 
+  // Stats derived from filtered expenses so cards react to filters
+  const filteredStats = {
+    total: filteredExpenses.length,
+    total_spent: filteredExpenses.reduce((sum, e) => sum + e.amount, 0),
+    paid: filteredExpenses.filter(e => e.payment_status === 'paid').length,
+    unpaid: filteredExpenses.filter(e => e.payment_status === 'unpaid').length,
+    pending: filteredExpenses.filter(e => e.payment_status === 'pending').length,
+  };
+
   const handleViewExpense = (expense: Expense) => {
     setSelectedExpense(expense);
     setIsModalOpen(true);
@@ -205,9 +215,9 @@ function ExpensesContent() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-900 dark:text-slate-100">
-              {isLoading ? "..." : stats.total}
+              {isLoading ? "..." : filteredStats.total}
             </div>
-            <p className="text-xs text-gray-500 mt-1">All time</p>
+            <p className="text-xs text-gray-500 mt-1">{filteredStats.total === stats.total ? "All time" : "Filtered"}</p>
           </CardContent>
         </Card>
         <Card>
@@ -219,9 +229,9 @@ function ExpensesContent() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-900 dark:text-slate-100">
-              {isLoading ? "..." : formatCurrency(stats.total_spent)}
+              {isLoading ? "..." : formatCurrency(filteredStats.total_spent)}
             </div>
-            <p className="text-xs text-gray-500 mt-1">All time</p>
+            <p className="text-xs text-gray-500 mt-1">{filteredStats.total === stats.total ? "All time" : "Filtered"}</p>
           </CardContent>
         </Card>
         <Card>
@@ -230,7 +240,7 @@ function ExpensesContent() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success-600">
-              {isLoading ? "..." : stats.paid}
+              {isLoading ? "..." : filteredStats.paid}
             </div>
             <p className="text-xs text-gray-500 mt-1">Completed payments</p>
           </CardContent>
@@ -241,7 +251,7 @@ function ExpensesContent() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-warning-600">
-              {isLoading ? "..." : stats.pending + stats.unpaid}
+              {isLoading ? "..." : filteredStats.pending + filteredStats.unpaid}
             </div>
             <p className="text-xs text-gray-500 mt-1">Unpaid/pending</p>
           </CardContent>
@@ -450,8 +460,8 @@ function ExpensesContent() {
 
       {/* View Expense Modal */}
       {isModalOpen && selectedExpense && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => { setIsModalOpen(false); setSelectedExpense(null); }}>
+          <div className="bg-white dark:bg-gray-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="p-6 space-y-6">
               {/* Header */}
               <div className="flex items-center justify-between border-b pb-4">
@@ -611,18 +621,21 @@ function ExpensesContent() {
               {selectedExpense.image_url && selectedExpense.image_url.trim() !== '' && (
                 <div className="border-t pt-4">
                   <p className="text-sm font-medium text-gray-500 mb-2">Receipt Image</p>
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-2 inline-block">
-                    <img 
-                      src={selectedExpense.image_url} 
-                      alt="Receipt" 
+                  <div
+                    className="bg-gray-100 dark:bg-gray-800 rounded-lg p-2 inline-block cursor-zoom-in"
+                    onClick={() => setLightboxUrl(selectedExpense.image_url!)}
+                    title="Click to zoom"
+                  >
+                    <img
+                      src={selectedExpense.image_url}
+                      alt="Receipt"
                       className="max-w-xs max-h-48 rounded-md shadow-sm"
                       onError={(e) => {
-                        console.error('Image failed to load:', selectedExpense.image_url);
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';
                         const errorMsg = document.createElement('p');
                         errorMsg.className = 'text-xs text-red-500';
-                        errorMsg.textContent = 'Failed to load receipt image. It may have been deleted or access was denied.';
+                        errorMsg.textContent = 'Failed to load receipt image.';
                         target.parentElement?.appendChild(errorMsg);
                       }}
                     />
@@ -639,6 +652,30 @@ function ExpensesContent() {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <button
+            className="absolute top-4 right-4 text-white bg-black/40 hover:bg-black/60 rounded-full p-2"
+            onClick={() => setLightboxUrl(null)}
+            aria-label="Close"
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <img
+            src={lightboxUrl}
+            alt="Receipt full view"
+            className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-2xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       )}
     </div>

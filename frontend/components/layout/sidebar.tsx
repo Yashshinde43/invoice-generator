@@ -8,7 +8,6 @@ import {
   Package,
   ShoppingCart,
   FileText,
-  Users,
   BarChart3,
   Settings,
   Menu,
@@ -18,7 +17,6 @@ import {
 import { useState } from "react";
 
 const navigation = [
-  { name: "Customers", href: "/dashboard/customers", icon: Users },
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Expenses", href: "/dashboard/expenses", icon: Wallet },
   { name: "Invoices", href: "/dashboard/invoices", icon: FileText },

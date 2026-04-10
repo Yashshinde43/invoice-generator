@@ -37,7 +37,6 @@ export interface Business {
   currency_symbol?: string; tax_rate?: number
   payment_details?: string; terms_conditions?: string
 }
-export interface Customer { id: string; name: string; phone?: string; email?: string; address?: string; gst_number?: string }
 export interface Product  { id: string; name: string; sku?: string; selling_price: number; purchase_price: number; current_stock: number; unit: string; is_track_stock: boolean }
 
 // ── Schema ────────────────────────────────────────────────────────────────────
@@ -69,16 +68,14 @@ function dueDateStr(from: string) {
 interface Props {
   business:  Business | null
   products:  Product[]
-  customers: Customer[]
 }
 
-export function NewInvoiceForm({ business, products, customers }: Props) {
+export function NewInvoiceForm({ business, products }: Props) {
   const router = useRouter()
   const { toast } = useToast()
   const [isDownloading, setIsDownloading] = useState(false)
   const [isSaving,      setIsSaving]      = useState(false)
   const [lineItems,     setLineItems]     = useState<LineItem[]>([])
-  const [selectedCustId, setSelectedCustId] = useState('')
 
   const sym     = business?.currency_symbol === '₹' ? 'Rs.' : (business?.currency_symbol || 'Rs.')
   const today   = todayStr()
@@ -110,23 +107,6 @@ export function NewInvoiceForm({ business, products, customers }: Props) {
       setValue('due_date', dueDateStr(formValues.invoice_date))
     }
   }, [formValues.invoice_date, setValue])
-
-  const handleCustomerChange = (id: string) => {
-    setSelectedCustId(id)
-    const c = customers.find(c => c.id === id)
-    if (c) {
-      setValue('customer_name',    c.name)
-      setValue('customer_phone',   c.phone       || '')
-      setValue('customer_address', c.address     || '')
-      setValue('customer_gst',     c.gst_number  || '')
-    }
-  }
-
-  const handleWalkIn = () => {
-    setSelectedCustId('')
-    setValue('customer_name', ''); setValue('customer_phone', '')
-    setValue('customer_address', ''); setValue('customer_gst', '')
-  }
 
   const totals = calculateInvoiceTotals(
     lineItems,
@@ -336,26 +316,9 @@ export function NewInvoiceForm({ business, products, customers }: Props) {
             <Card>
               <CardHeader>
                 <CardTitle>Bill To</CardTitle>
-                <CardDescription>Select an existing customer or enter manually</CardDescription>
+                <CardDescription>Enter customer details</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Select
-                  value={selectedCustId || 'walk-in'}
-                  onValueChange={v => v === 'walk-in' ? handleWalkIn() : handleCustomerChange(v)}
-                >
-                  <SelectTrigger className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-slate-100"><SelectValue placeholder="Select customer…" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="walk-in">— Walk-in / Manual Entry —</SelectItem>
-                    {customers.map(c => (
-                      <SelectItem key={c.id} value={c.id} className="text-gray-900 dark:text-slate-100">
-                        {c.name}{c.phone ? ` · ${c.phone}` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Separator />
-
                 <div className="grid gap-3 md:grid-cols-2">
                   <div className="md:col-span-2">
                     <Label htmlFor="customer_name">Customer Name <span className="text-red-500">*</span></Label>

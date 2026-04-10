@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,6 +97,12 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   // Clean up image preview URL when component unmounts
   useEffect(() => {
@@ -409,6 +415,64 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
     if (fileInput) {
       fileInput.value = '';
     }
+  };
+
+  const startCamera = async (facing: "environment" | "user" = facingMode) => {
+    setCameraError(null);
+    // Stop any existing stream
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } },
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err: any) {
+      setCameraError(err?.message || "Camera access denied. Please allow camera permission.");
+    }
+  };
+
+  const openCamera = () => {
+    setCameraOpen(true);
+    // Start stream after modal renders
+    setTimeout(() => startCamera(facingMode), 100);
+  };
+
+  const closeCamera = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+    setCameraOpen(false);
+    setCameraError(null);
+  };
+
+  const flipCamera = () => {
+    const next = facingMode === "environment" ? "user" : "environment";
+    setFacingMode(next);
+    startCamera(next);
+  };
+
+  const capturePhoto = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const file = new File([blob], `receipt-${Date.now()}.jpg`, { type: "image/jpeg" });
+      handleFileChange({ target: { files: [file] } } as any);
+      closeCamera();
+    }, "image/jpeg", 0.92);
   };
 
   // Render category-specific fields
@@ -900,27 +964,27 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
           <div className="lg:col-span-2 space-y-6">
             
             {/* Category Info Card */}
-            <Card className="border-primary-200 bg-primary-50/40">
+            <Card>
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl bg-primary-100 dark:bg-white/10 rounded-lg p-2">
+                    <span className="text-2xl rounded-lg p-2">
                       {categoryData.icon}
                     </span>
-                    <CardTitle className="text-sm font-semibold text-primary-800">
+                    <CardTitle className="text-sm font-semibold">
                       {categoryData.label} Expense
                     </CardTitle>
                   </div>
-                  <Badge variant="outline" className="text-xs text-primary-600 border-primary-300">
+                  <Badge variant="outline" className="text-xs">
                     {formatExpenseCategory(category)}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
-                <p className="text-sm text-primary-700">
+                <p className="text-sm text-gray-500">
                   This expense will be categorized under {categoryData.label.toLowerCase()} for tracking and reporting purposes.
                 </p>
-                <p className="text-xs text-gray-500 mt-2">
+                <p className="text-xs text-gray-400 mt-2">
                   <span className="text-red-500">*</span> indicates required fields
                 </p>
               </CardContent>
@@ -1110,22 +1174,46 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
 
                 {/* Receipt Image Upload - REQUIRED */}
                 <div>
-                  <Label htmlFor="receipt_image">
+                  <Label>
                     <svg className="h-3.5 w-3.5 inline mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     Receipt Image <span className="text-red-500">*</span>
                   </Label>
-                  <Input
+                  {/* Hidden file input for gallery upload */}
+                  <input
                     id="receipt_image"
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
-                    required
-                    className="mt-1 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                    className="hidden"
                   />
+                  {/* Two action buttons */}
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById('receipt_image')?.click()}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-primary-400 text-sm font-medium text-gray-600 hover:text-primary-700 transition-colors"
+                    >
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                      Upload Image
+                    </button>
+                    <button
+                      type="button"
+                      onClick={openCamera}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-primary-400 text-sm font-medium text-gray-600 hover:text-primary-700 transition-colors"
+                    >
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      Take Photo
+                    </button>
+                  </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    Upload receipt image (JPG, PNG) - Required
+                    Upload from gallery or take a photo - Required
                   </p>
                   
                    {/* Image Preview Section - ALWAYS show when file is selected */}
@@ -1136,21 +1224,21 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
                         ✓ Selected: {selectedImage.name}
                       </p>
                       
-                      {/* Debug info */}
                       <p className="text-xs text-gray-500">
-                        Type: {selectedImage.type || 'unknown'} | Size: {(selectedImage.size / 1024).toFixed(1)} KB
+                        Size: {(selectedImage.size / 1024).toFixed(1)} KB
                       </p>
-                      
+
                       {/* Image Preview - show for image files only */}
                       {imagePreviewUrl && selectedImage?.type?.startsWith('image/') && (
                         <div className="flex items-center gap-3">
                           <div className="relative inline-block group flex-shrink-0">
                             <div className="relative">
-                              <img 
-                                src={imagePreviewUrl} 
-                                alt="Receipt preview" 
-                                className="max-w-xs max-h-32 rounded-md shadow-sm border border-gray-300 object-contain"
-                                onLoad={() => console.log('✅ Image loaded successfully:', imagePreviewUrl)}
+                              <img
+                                src={imagePreviewUrl}
+                                alt="Receipt preview"
+                                className="max-w-xs max-h-32 rounded-md shadow-sm border border-gray-300 object-contain cursor-zoom-in"
+                                title="Click to zoom"
+                                onClick={() => setLightboxUrl(imagePreviewUrl)}
                               />
                               
                               {/* Remove button */}
@@ -1310,6 +1398,107 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
 
         </div>
       </form>
+
+      {/* Live Camera Modal */}
+      {cameraOpen && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black">
+          {/* Header */}
+          <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-4 py-3 bg-black/60 z-10">
+            <span className="text-white font-semibold text-sm tracking-wide">Take Receipt Photo</span>
+            <button
+              type="button"
+              onClick={closeCamera}
+              className="text-white bg-white/20 hover:bg-white/30 rounded-full p-2 transition-colors"
+              aria-label="Close camera"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Video stream */}
+          {cameraError ? (
+            <div className="flex flex-col items-center gap-4 px-8 text-center">
+              <svg className="h-16 w-16 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.277A1 1 0 0121 8.68v6.64a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+              </svg>
+              <p className="text-white text-sm">{cameraError}</p>
+              <button
+                type="button"
+                onClick={() => startCamera(facingMode)}
+                className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium"
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+              style={{ maxHeight: "100dvh" }}
+            />
+          )}
+
+          {/* Bottom controls */}
+          {!cameraError && (
+            <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-8 pb-8 pt-4 bg-gradient-to-t from-black/70 to-transparent z-10">
+              {/* Flip camera */}
+              <button
+                type="button"
+                onClick={flipCamera}
+                className="flex flex-col items-center gap-1 text-white/80 hover:text-white transition-colors"
+                aria-label="Flip camera"
+              >
+                <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span className="text-xs">Flip</span>
+              </button>
+
+              {/* Capture button */}
+              <button
+                type="button"
+                onClick={capturePhoto}
+                className="w-16 h-16 rounded-full bg-white border-4 border-white/50 shadow-lg active:scale-95 transition-transform flex items-center justify-center"
+                aria-label="Capture photo"
+              >
+                <div className="w-12 h-12 rounded-full bg-white" />
+              </button>
+
+              {/* Spacer to balance layout */}
+              <div className="w-12" />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <button
+            className="absolute top-4 right-4 text-white bg-black/40 hover:bg-black/60 rounded-full p-2"
+            onClick={() => setLightboxUrl(null)}
+            aria-label="Close"
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <img
+            src={lightboxUrl}
+            alt="Receipt full view"
+            className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-2xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

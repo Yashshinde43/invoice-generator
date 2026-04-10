@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import {
   TrendingUp, TrendingDown, Package, ShoppingCart,
-  Users, DollarSign, AlertCircle, ArrowRight, Plus,
+  DollarSign, AlertCircle, ArrowRight, Plus,
 } from "lucide-react";
 import { getDashboardStats, getRecentInvoices } from "@/app/actions";
 import { getSalesChartData, getProfitChartData, getTopProductsData, getPaymentStatusData } from "@/app/actions/dashboard";
@@ -295,8 +295,6 @@ async function DashboardContent() {
             iconBg="bg-emerald-50 dark:bg-emerald-500/10" iconColor="text-emerald-600 dark:text-emerald-400" />
           <QuickAction href="/dashboard/purchases"    icon={ShoppingCart} label="New Purchase" sub="Record a purchase"
             iconBg="bg-amber-50 dark:bg-amber-500/10" iconColor="text-amber-600 dark:text-amber-400" />
-          <QuickAction href="/dashboard/customers"    icon={Users}        label="Add Customer" sub="New customer entry"
-            iconBg="bg-violet-50 dark:bg-violet-500/10" iconColor="text-violet-600 dark:text-violet-400" />
         </div>
       </div>
 
