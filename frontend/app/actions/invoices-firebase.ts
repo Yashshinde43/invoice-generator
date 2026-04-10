@@ -465,6 +465,19 @@ export async function getProductsForInvoice() {
   }
 }
 
+// Update invoice with PDF URL after client-side upload
+export async function updateInvoicePdfUrl(invoiceId: string, pdfUrl: string) {
+  try {
+    const invoiceRef = doc(collections.invoices, invoiceId)
+    await updateDoc(invoiceRef, { pdf_url: pdfUrl, updated_at: new Date().toISOString() })
+    revalidatePath('/dashboard/invoices')
+    return { error: null }
+  } catch (error: any) {
+    console.error('updateInvoicePdfUrl', error)
+    return { error: error.message }
+  }
+}
+
 // Get customers list for invoice creation
 export async function getCustomersForInvoice() {
   try {

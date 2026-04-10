@@ -22,7 +22,8 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { InvoiceLineItems, LineItem } from '@/components/invoice/InvoiceLineItems'
-import { createInvoice } from '@/app/actions/invoices-firebase'
+import { createInvoice, updateInvoicePdfUrl } from '@/app/actions/invoices-firebase'
+import { storage, storageSDK } from '@/lib/firebase'
 import { formatCurrency } from '@/lib/utils'
 import { calculateInvoiceTotals } from '@/lib/invoice/calculations'
 import { downloadInvoicePDF } from '@/lib/pdf/invoice'
@@ -209,6 +210,18 @@ export function NewInvoiceForm({ business, products }: Props) {
     }
   }
 
+  const uploadPDFToStorage = async (blob: Blob, invoiceId: string, invoiceNumber: string): Promise<string | null> => {
+    try {
+      const { storageRef, uploadBytes, getDownloadURL } = storageSDK
+      const ref = storageRef(storage, `invoices/${invoiceId}/${invoiceNumber}.pdf`)
+      await uploadBytes(ref, blob, { contentType: 'application/pdf' })
+      return await getDownloadURL(ref)
+    } catch (err) {
+      console.error('PDF upload failed:', err)
+      return null
+    }
+  }
+
   const onSave = async (data: FormValues) => {
     if (!validate()) return
     setIsSaving(true)
@@ -218,7 +231,16 @@ export function NewInvoiceForm({ business, products }: Props) {
         toast({ variant: 'destructive', title: 'Save failed', description: result.error })
         return
       }
-      toast({ title: 'Invoice saved!' })
+      const invoiceId = result.data?.id!
+      const invoiceNumber = result.data?.invoice_number || `INV-${Date.now().toString().slice(-6)}`
+
+      // Generate & upload PDF silently in background
+      const { generateInvoicePDFBlob } = await import('@/lib/pdf/invoice')
+      const blob = await generateInvoicePDFBlob(buildPDFData(data, invoiceNumber))
+      const pdfUrl = await uploadPDFToStorage(blob, invoiceId, invoiceNumber)
+      if (pdfUrl) await updateInvoicePdfUrl(invoiceId, pdfUrl)
+
+      toast({ title: 'Invoice saved!', description: `${invoiceNumber} saved successfully.` })
       router.push('/dashboard/invoices')
     } catch (err: any) {
       toast({ variant: 'destructive', title: 'Save failed', description: err?.message })
@@ -235,12 +257,27 @@ export function NewInvoiceForm({ business, products }: Props) {
         toast({ variant: 'destructive', title: 'Save failed', description: result.error })
         return
       }
-
-      // 2. Generate PDF using the same invoice number that's stored in Firebase
+      const invoiceId = result.data?.id!
       const invoiceNumber = result.data?.invoice_number || `INV-${Date.now().toString().slice(-6)}`
-      await downloadInvoicePDF(buildPDFData(data, invoiceNumber), `Invoice_${invoiceNumber}.pdf`)
+      const pdfData = buildPDFData(data, invoiceNumber)
 
-      toast({ title: 'Invoice downloaded!', description: `${invoiceNumber} saved and PDF downloaded.` })
+      // 2. Generate PDF blob once — use for both download and storage upload
+      const { generateInvoicePDFBlob } = await import('@/lib/pdf/invoice')
+      const blob = await generateInvoicePDFBlob(pdfData)
+
+      // 3. Download to user's device
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `Invoice_${invoiceNumber}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      // 4. Upload to Firebase Storage
+      const pdfUrl = await uploadPDFToStorage(blob, invoiceId, invoiceNumber)
+      if (pdfUrl) await updateInvoicePdfUrl(invoiceId, pdfUrl)
+
+      toast({ title: 'Invoice downloaded!', description: `${invoiceNumber} saved and PDF uploaded.` })
       router.push('/dashboard/invoices')
     } catch (err: any) {
       toast({ variant: 'destructive', title: 'Download failed', description: err?.message })
