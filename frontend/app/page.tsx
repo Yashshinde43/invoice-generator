@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { Instrument_Serif, DM_Sans } from 'next/font/google'
+import { NavButtons } from '@/components/home/nav-buttons'
+import { LoadingLink } from '@/components/home/loading-link'
 
 const serif = Instrument_Serif({
   weight: ['400'],
@@ -23,8 +25,8 @@ export default function Home() {
           --surface: #0d0d1a;
           --card: #111120;
           --border: rgba(255,255,255,0.07);
-          --indigo: #6366f1;
-          --indigo-bright: #818cf8;
+          --indigo: #16a869;
+          --emerald-bright: #38cc87;
           --amber: #f59e0b;
           --text: #f1f5f9;
           --muted: #64748b;
@@ -78,7 +80,7 @@ export default function Home() {
         .nav-logo-mark {
           width: 32px;
           height: 32px;
-          background: linear-gradient(135deg, var(--indigo), #4f46e5);
+          background: linear-gradient(135deg, var(--indigo), #0d8f59);
           border-radius: 8px;
           display: flex;
           align-items: center;
@@ -86,7 +88,7 @@ export default function Home() {
           font-size: 14px;
           font-weight: 700;
           color: white;
-          box-shadow: 0 0 20px rgba(99,102,241,0.4);
+          box-shadow: 0 0 20px rgba(16,168,105,0.4);
           flex-shrink: 0;
         }
         .nav-logo-text {
@@ -135,12 +137,12 @@ export default function Home() {
           text-decoration: none;
           border-radius: 8px;
           transition: all 0.2s;
-          box-shadow: 0 0 20px rgba(99,102,241,0.3);
+          box-shadow: 0 0 20px rgba(16,168,105,0.3);
           letter-spacing: -0.01em;
         }
         .btn-primary:hover {
-          background: var(--indigo-bright);
-          box-shadow: 0 0 32px rgba(99,102,241,0.5);
+          background: var(--emerald-bright);
+          box-shadow: 0 0 32px rgba(16,168,105,0.5);
           transform: translateY(-1px);
         }
 
@@ -167,7 +169,7 @@ export default function Home() {
         .orb-1 {
           width: 600px;
           height: 600px;
-          background: rgba(99,102,241,0.12);
+          background: rgba(16,168,105,0.12);
           top: -100px;
           left: -200px;
           animation: drift1 12s ease-in-out infinite;
@@ -212,20 +214,20 @@ export default function Home() {
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          background: rgba(99,102,241,0.1);
-          border: 1px solid rgba(99,102,241,0.25);
+          background: rgba(16,168,105,0.1);
+          border: 1px solid rgba(16,168,105,0.25);
           border-radius: 100px;
           padding: 6px 14px;
           font-size: 12px;
           font-weight: 500;
-          color: var(--indigo-bright);
+          color: var(--emerald-bright);
           margin-bottom: 2rem;
           animation: fadeUp 0.6s ease both;
         }
         .hero-badge-dot {
           width: 6px;
           height: 6px;
-          background: var(--indigo-bright);
+          background: var(--emerald-bright);
           border-radius: 50%;
           animation: pulse-dot 2s ease-in-out infinite;
         }
@@ -245,7 +247,7 @@ export default function Home() {
         }
         .hero-headline em {
           font-style: italic;
-          color: var(--indigo-bright);
+          color: var(--emerald-bright);
         }
         .hero-headline .accent-line {
           display: block;
@@ -285,12 +287,12 @@ export default function Home() {
           text-decoration: none;
           border-radius: 10px;
           transition: all 0.2s;
-          box-shadow: 0 0 30px rgba(99,102,241,0.35), 0 4px 20px rgba(0,0,0,0.4);
+          box-shadow: 0 0 30px rgba(16,168,105,0.35), 0 4px 20px rgba(0,0,0,0.4);
           letter-spacing: -0.02em;
         }
         .btn-hero-primary:hover {
-          background: var(--indigo-bright);
-          box-shadow: 0 0 50px rgba(99,102,241,0.5), 0 4px 20px rgba(0,0,0,0.4);
+          background: var(--emerald-bright);
+          box-shadow: 0 0 50px rgba(16,168,105,0.5), 0 4px 20px rgba(0,0,0,0.4);
           transform: translateY(-2px);
         }
         .btn-hero-primary svg { transition: transform 0.2s; }
@@ -363,7 +365,7 @@ export default function Home() {
         .mockup-glow {
           position: absolute;
           inset: -40px;
-          background: radial-gradient(circle at 50% 50%, rgba(99,102,241,0.15) 0%, transparent 70%);
+          background: radial-gradient(circle at 50% 50%, rgba(16,168,105,0.15) 0%, transparent 70%);
           pointer-events: none;
         }
 
@@ -372,7 +374,7 @@ export default function Home() {
           border: 1px solid rgba(255,255,255,0.09);
           border-radius: 16px;
           padding: 28px;
-          box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.1);
+          box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(16,168,105,0.1);
           transform: perspective(1000px) rotateY(-4deg) rotateX(2deg);
           transition: transform 0.5s ease;
           position: relative;
@@ -385,7 +387,7 @@ export default function Home() {
           left: 0;
           right: 0;
           height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(99,102,241,0.5), rgba(245,158,11,0.3), transparent);
+          background: linear-gradient(90deg, transparent, rgba(16,168,105,0.5), rgba(245,158,11,0.3), transparent);
         }
         .invoice-card:hover {
           transform: perspective(1000px) rotateY(-1deg) rotateX(1deg);
@@ -407,7 +409,7 @@ export default function Home() {
         .inv-logo-mark {
           width: 36px;
           height: 36px;
-          background: linear-gradient(135deg, #6366f1, #4f46e5);
+          background: linear-gradient(135deg, #16a869, #0d8f59);
           border-radius: 8px;
           display: flex;
           align-items: center;
@@ -552,7 +554,7 @@ export default function Home() {
           padding-top: 10px;
           border-top: 1px solid var(--border);
         }
-        .inv-total-final .amount { color: var(--indigo-bright); }
+        .inv-total-final .amount { color: var(--emerald-bright); }
 
         /* Floating mini cards */
         .float-card {
@@ -628,7 +630,7 @@ export default function Home() {
           left: 0;
           right: 0;
           height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(99,102,241,0.3), transparent);
+          background: linear-gradient(90deg, transparent, rgba(16,168,105,0.3), transparent);
         }
 
         .stat-item {
@@ -642,7 +644,7 @@ export default function Home() {
           line-height: 1;
           margin-bottom: 6px;
         }
-        .stat-number span { color: var(--indigo-bright); }
+        .stat-number span { color: var(--emerald-bright); }
         .stat-label {
           font-size: 13px;
           color: var(--muted);
@@ -668,7 +670,7 @@ export default function Home() {
           gap: 8px;
           font-size: 12px;
           font-weight: 600;
-          color: var(--indigo-bright);
+          color: var(--emerald-bright);
           text-transform: uppercase;
           letter-spacing: 0.1em;
           margin-bottom: 1.25rem;
@@ -678,7 +680,7 @@ export default function Home() {
           display: block;
           width: 20px;
           height: 1px;
-          background: var(--indigo-bright);
+          background: var(--emerald-bright);
         }
 
         .section-title {
@@ -692,7 +694,7 @@ export default function Home() {
         }
         .section-title em {
           font-style: italic;
-          color: var(--indigo-bright);
+          color: var(--emerald-bright);
         }
 
         .section-sub {
@@ -725,7 +727,7 @@ export default function Home() {
           content: '';
           position: absolute;
           inset: 0;
-          background: radial-gradient(circle at 0% 0%, rgba(99,102,241,0.08) 0%, transparent 60%);
+          background: radial-gradient(circle at 0% 0%, rgba(16,168,105,0.08) 0%, transparent 60%);
           opacity: 0;
           transition: opacity 0.3s;
         }
@@ -786,8 +788,8 @@ export default function Home() {
           transition: border-color 0.3s, box-shadow 0.3s;
         }
         .how-card:hover {
-          border-color: rgba(99,102,241,0.3);
-          box-shadow: 0 0 30px rgba(99,102,241,0.08);
+          border-color: rgba(16,168,105,0.3);
+          box-shadow: 0 0 30px rgba(16,168,105,0.08);
         }
 
         .how-step {
@@ -801,7 +803,7 @@ export default function Home() {
           justify-content: center;
           font-size: 18px;
           font-weight: 700;
-          color: var(--indigo-bright);
+          color: var(--emerald-bright);
           margin-bottom: 1.5rem;
           letter-spacing: -0.02em;
           font-family: monospace;
@@ -825,12 +827,12 @@ export default function Home() {
           margin: 0 6rem 7rem;
           border-radius: 24px;
           background: linear-gradient(135deg, #0f0f2a 0%, #111130 50%, #0a0a1e 100%);
-          border: 1px solid rgba(99,102,241,0.2);
+          border: 1px solid rgba(16,168,105,0.2);
           padding: 6rem;
           text-align: center;
           position: relative;
           overflow: hidden;
-          box-shadow: 0 0 80px rgba(99,102,241,0.12);
+          box-shadow: 0 0 80px rgba(16,168,105,0.12);
         }
         .cta-section::before {
           content: '';
@@ -840,7 +842,7 @@ export default function Home() {
           transform: translateX(-50%);
           width: 600px;
           height: 300px;
-          background: radial-gradient(ellipse, rgba(99,102,241,0.2) 0%, transparent 70%);
+          background: radial-gradient(ellipse, rgba(16,168,105,0.2) 0%, transparent 70%);
           pointer-events: none;
         }
         .cta-section::after {
@@ -850,7 +852,7 @@ export default function Home() {
           left: 0;
           right: 0;
           height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(99,102,241,0.5), rgba(245,158,11,0.3), transparent);
+          background: linear-gradient(90deg, transparent, rgba(16,168,105,0.5), rgba(245,158,11,0.3), transparent);
         }
 
         .cta-title {
@@ -865,7 +867,7 @@ export default function Home() {
         }
         .cta-title em {
           font-style: italic;
-          color: var(--indigo-bright);
+          color: var(--emerald-bright);
         }
 
         .cta-sub {
@@ -900,12 +902,12 @@ export default function Home() {
           text-decoration: none;
           border-radius: 10px;
           transition: all 0.2s;
-          box-shadow: 0 0 40px rgba(99,102,241,0.4), 0 4px 20px rgba(0,0,0,0.4);
+          box-shadow: 0 0 40px rgba(16,168,105,0.4), 0 4px 20px rgba(0,0,0,0.4);
           letter-spacing: -0.02em;
         }
         .btn-cta:hover {
-          background: var(--indigo-bright);
-          box-shadow: 0 0 60px rgba(99,102,241,0.55), 0 4px 20px rgba(0,0,0,0.4);
+          background: var(--emerald-bright);
+          box-shadow: 0 0 60px rgba(16,168,105,0.55), 0 4px 20px rgba(0,0,0,0.4);
           transform: translateY(-2px);
         }
 
@@ -944,7 +946,7 @@ export default function Home() {
         .footer-mark {
           width: 26px;
           height: 26px;
-          background: linear-gradient(135deg, var(--indigo), #4f46e5);
+          background: linear-gradient(135deg, var(--indigo), #0d8f59);
           border-radius: 6px;
           display: flex;
           align-items: center;
@@ -1013,11 +1015,10 @@ export default function Home() {
           <ul className="nav-links">
             <li><a href="#features">Features</a></li>
             <li><a href="#how-it-works">How it works</a></li>
-            <li><a href="/dashboard">Dashboard</a></li>
+            <li><LoadingLink href="/dashboard">Dashboard</LoadingLink></li>
           </ul>
           <div className="nav-cta">
-            <Link href="/login" className="btn-ghost">Login</Link>
-            <Link href="/signup" className="btn-primary">Get started free</Link>
+            <NavButtons loginClass="btn-ghost" getStartedClass="btn-primary" />
           </div>
         </nav>
 
@@ -1046,25 +1047,25 @@ export default function Home() {
               </p>
 
               <div className="hero-actions">
-                <Link href="/signup" className="btn-hero-primary">
+                <LoadingLink href="/signup" className="btn-hero-primary" spinnerLight>
                   Start for free
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                </Link>
-                <Link href="/login" className="btn-hero-secondary">
+                </LoadingLink>
+                <LoadingLink href="/login" className="btn-hero-secondary">
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                     <path d="M8 1a7 7 0 100 14A7 7 0 008 1z" stroke="currentColor" strokeWidth="1.5"/>
                     <path d="M6 5.5l4 2.5-4 2.5V5.5z" fill="currentColor"/>
                   </svg>
                   See demo
-                </Link>
+                </LoadingLink>
               </div>
 
               <div className="hero-trust">
                 <div className="hero-avatars">
                   {[
-                    { bg: '#6366f1', label: 'R' },
+                    { bg: '#16a869', label: 'R' },
                     { bg: '#f59e0b', label: 'A' },
                     { bg: '#22c55e', label: 'S' },
                     { bg: '#ec4899', label: 'P' },
@@ -1090,7 +1091,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div className="float-card float-card-2">
-                  <div className="float-icon" style={{ background: 'rgba(99,102,241,0.12)', color: '#818cf8' }}>
+                  <div className="float-icon" style={{ background: 'rgba(16,168,105,0.12)', color: '#38cc87' }}>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                       <path d="M2 12l4-4 3 3 5-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
@@ -1213,7 +1214,7 @@ export default function Home() {
             {[
               {
                 icon: '🧾',
-                bg: 'rgba(99,102,241,0.1)',
+                bg: 'rgba(16,168,105,0.1)',
                 title: 'Smart Invoicing',
                 desc: 'Create GST-compliant invoices in seconds. Auto-calculate taxes, apply discounts, and send directly to clients via email or WhatsApp.',
               },
@@ -1237,7 +1238,7 @@ export default function Home() {
               },
               {
                 icon: '🧮',
-                bg: 'rgba(99,102,241,0.1)',
+                bg: 'rgba(16,168,105,0.1)',
                 title: 'GST & Tax Reports',
                 desc: 'Generate GSTR-1, GSTR-3B summaries instantly. Export reports ready for your CA with one click.',
               },
@@ -1303,12 +1304,12 @@ export default function Home() {
             Join thousands of Indian businesses that invoice faster and track smarter with InvoiceBuilder.
           </p>
           <div className="cta-actions">
-            <Link href="/signup" className="btn-cta">
+            <LoadingLink href="/signup" className="btn-cta" spinnerLight>
               Create your free account
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-            </Link>
+            </LoadingLink>
           </div>
           <div className="cta-note">
             <span>Free forever for small businesses</span>
@@ -1329,8 +1330,8 @@ export default function Home() {
           <ul className="footer-links">
             <li><a href="#">Privacy</a></li>
             <li><a href="#">Terms</a></li>
-            <li><Link href="/login">Login</Link></li>
-            <li><Link href="/signup">Sign up</Link></li>
+            <li><LoadingLink href="/login">Login</LoadingLink></li>
+            <li><LoadingLink href="/signup">Sign up</LoadingLink></li>
           </ul>
         </footer>
 

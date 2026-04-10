@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { cookies, headers } from 'next/headers'
-import { Sidebar } from "@/components/layout/sidebar"
 import { Header } from "@/components/layout/header"
+import { DashboardShell } from "@/components/layout/dashboard-shell"
 import { SetupModal } from '@/components/setup/SetupModal'
 import { getUserBusiness } from '@/app/actions/business-firebase'
 import { firestore } from '@/lib/firebase'
@@ -54,17 +54,19 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[hsl(var(--app-bg))]">
-      <Sidebar />
-      <div className="lg:ml-64">
-        <Header
-          userName={profile?.full_name || 'User'}
-          userEmail={profile?.email || ''}
-          businessName={business ? (business as any).name : 'My Business'}
-        />
-        <main className="p-4 lg:p-8">{children}</main>
-      </div>
+    <>
+      <DashboardShell
+        header={
+          <Header
+            userName={profile?.full_name || 'User'}
+            userEmail={profile?.email || ''}
+            businessName={business ? (business as any).name : 'My Business'}
+          />
+        }
+      >
+        {children}
+      </DashboardShell>
       {!business && <SetupModal />}
-    </div>
+    </>
   );
 }

@@ -19,7 +19,7 @@ import {
 function AmbientOrbs() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
-      {/* Top-right indigo orb */}
+      {/* Top-right emerald orb */}
       <div
         className="absolute -top-32 -right-32 w-[520px] h-[520px] rounded-full opacity-[0.06] dark:opacity-[0.09]"
         style={{
@@ -93,12 +93,12 @@ function StatCard({
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
         style={{
-          background: `radial-gradient(ellipse at 0% 0%, ${glowColor ?? "rgba(99,102,241,0.07)"} 0%, transparent 60%)`,
+          background: `radial-gradient(ellipse at 0% 0%, ${glowColor ?? "rgba(16,168,105,0.07)"} 0%, transparent 60%)`,
         }}
       />
 
       {/* Top accent line */}
-      <div className={`absolute top-0 left-0 right-0 h-[1.5px] ${accent ?? "bg-gradient-to-r from-indigo-500/70 via-indigo-400/30 to-transparent"}`} />
+      <div className={`absolute top-0 left-0 right-0 h-[1.5px] ${accent ?? "bg-gradient-to-r from-emerald-500/70 via-emerald-400/30 to-transparent"}`} />
 
       <div className="relative flex items-start justify-between mb-4">
         <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
@@ -173,7 +173,7 @@ function QuickAction({ href, icon: Icon, label, sub, iconBg, iconColor }: {
         border border-slate-200/80 dark:border-white/[0.07]
         bg-white/70 dark:bg-white/[0.03]
         backdrop-blur-sm
-        hover:border-indigo-200 dark:hover:border-indigo-500/25
+        hover:border-emerald-200 dark:hover:border-emerald-500/25
         hover:bg-white dark:hover:bg-white/[0.05]
         transition-all duration-200"
       style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}
@@ -186,7 +186,7 @@ function QuickAction({ href, icon: Icon, label, sub, iconBg, iconColor }: {
         <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 tracking-tight">{label}</p>
         <p className="text-xs text-slate-500 dark:text-slate-500 truncate mt-0.5">{sub}</p>
       </div>
-      <ArrowRight className="h-3.5 w-3.5 text-slate-300 dark:text-slate-600 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" />
+      <ArrowRight className="h-3.5 w-3.5 text-slate-300 dark:text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" />
     </Link>
   );
 }
@@ -249,8 +249,8 @@ async function DashboardContent() {
         <Link
           href="/dashboard/invoices/new"
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold
-            bg-indigo-600 hover:bg-indigo-500 text-white
-            shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40
+            bg-emerald-600 hover:bg-emerald-500 text-white
+            shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40
             hover:-translate-y-px transition-all duration-200"
         >
           <Plus className="h-3.5 w-3.5" />
@@ -262,8 +262,8 @@ async function DashboardContent() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Today's Sales"   value={formatCurrency(stats.today_sales)}
           icon={DollarSign}
-          accent="bg-gradient-to-r from-indigo-500/80 via-indigo-400/25 to-transparent"
-          glowColor="rgba(99,102,241,0.09)" />
+          accent="bg-gradient-to-r from-emerald-500/80 via-emerald-400/25 to-transparent"
+          glowColor="rgba(16,168,105,0.09)" />
         <StatCard title="Today's Profit"  value={formatCurrency(stats.today_profit)}
           icon={TrendingUp}
           accent="bg-gradient-to-r from-emerald-500/80 via-emerald-400/25 to-transparent"
@@ -290,11 +290,9 @@ async function DashboardContent() {
         </h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <QuickAction href="/dashboard/invoices/new" icon={ShoppingCart} label="New Invoice" sub="Create a sales invoice"
-            iconBg="bg-indigo-50 dark:bg-indigo-500/10" iconColor="text-indigo-600 dark:text-indigo-400" />
+            iconBg="bg-emerald-50 dark:bg-emerald-500/10" iconColor="text-emerald-600 dark:text-emerald-400" />
           <QuickAction href="/dashboard/products"     icon={Package}      label="Add Product"  sub="Add to inventory"
             iconBg="bg-emerald-50 dark:bg-emerald-500/10" iconColor="text-emerald-600 dark:text-emerald-400" />
-          <QuickAction href="/dashboard/purchases"    icon={ShoppingCart} label="New Purchase" sub="Record a purchase"
-            iconBg="bg-amber-50 dark:bg-amber-500/10" iconColor="text-amber-600 dark:text-amber-400" />
         </div>
       </div>
 
@@ -310,8 +308,8 @@ async function DashboardContent() {
               <p className="text-xs text-slate-500 dark:text-slate-500 mt-0.5">Latest 5 invoices</p>
             </div>
             <Link href="/dashboard/invoices"
-              className="flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400
-                hover:text-indigo-500 transition-colors">
+              className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400
+                hover:text-emerald-500 transition-colors">
               View all <ArrowRight className="h-3 w-3" />
             </Link>
           </div>
@@ -348,9 +346,9 @@ async function DashboardContent() {
                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-400">No invoices yet</p>
                 <p className="text-xs text-slate-500 dark:text-slate-600 mt-1 mb-4">Create your first invoice to get started</p>
                 <Link href="/dashboard/invoices/new"
-                  className="px-4 py-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400
-                    border border-indigo-200 dark:border-indigo-500/25 rounded-lg
-                    hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors">
+                  className="px-4 py-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400
+                    border border-emerald-200 dark:border-emerald-500/25 rounded-lg
+                    hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors">
                   Create Invoice
                 </Link>
               </div>
@@ -367,8 +365,8 @@ async function DashboardContent() {
               <p className="text-xs text-slate-500 dark:text-slate-500 mt-0.5">Products running low</p>
             </div>
             <Link href="/dashboard/products"
-              className="flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400
-                hover:text-indigo-500 transition-colors">
+              className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400
+                hover:text-emerald-500 transition-colors">
               View all <ArrowRight className="h-3 w-3" />
             </Link>
           </div>

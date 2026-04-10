@@ -124,7 +124,7 @@ export default function SignupPage() {
         <div className="space-y-2">
           {/* Mobile logo */}
           <div className="flex items-center gap-2.5 mb-6 lg:hidden">
-            <div className="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center shadow-md shadow-amber-500/30">
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center shadow-md shadow-emerald-500/30">
               <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
@@ -161,7 +161,7 @@ export default function SignupPage() {
                 name="name"
                 type="text"
                 placeholder="John Doe"
-                className="pl-10 h-11 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus-visible:ring-amber-500/30 focus-visible:border-amber-500 dark:focus-visible:border-amber-500 rounded-xl transition-colors"
+                className="pl-10 h-11 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus-visible:ring-emerald-500/30 focus-visible:border-emerald-500 dark:focus-visible:border-emerald-500 rounded-xl transition-colors"
                 required
               />
             </div>
@@ -178,7 +178,7 @@ export default function SignupPage() {
                 name="email"
                 type="email"
                 placeholder="you@example.com"
-                className="pl-10 h-11 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus-visible:ring-amber-500/30 focus-visible:border-amber-500 dark:focus-visible:border-amber-500 rounded-xl transition-colors"
+                className="pl-10 h-11 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus-visible:ring-emerald-500/30 focus-visible:border-emerald-500 dark:focus-visible:border-emerald-500 rounded-xl transition-colors"
                 required
               />
             </div>
@@ -195,7 +195,7 @@ export default function SignupPage() {
                 name="password"
                 type="password"
                 placeholder="Minimum 6 characters"
-                className="pl-10 h-11 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus-visible:ring-amber-500/30 focus-visible:border-amber-500 dark:focus-visible:border-amber-500 rounded-xl transition-colors"
+                className="pl-10 h-11 bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 focus-visible:ring-emerald-500/30 focus-visible:border-emerald-500 dark:focus-visible:border-emerald-500 rounded-xl transition-colors"
                 required
                 minLength={6}
               />
@@ -208,7 +208,7 @@ export default function SignupPage() {
               id="terms"
               name="terms"
               required
-              className="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 accent-amber-500 cursor-pointer"
+              className="mt-0.5 h-4 w-4 rounded border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 accent-emerald-600 cursor-pointer"
             />
             <Label htmlFor="terms" className="text-sm text-gray-500 dark:text-gray-400 font-normal leading-relaxed cursor-pointer">
               I agree to the{" "}
@@ -235,7 +235,7 @@ export default function SignupPage() {
           </p>
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-600 hover:text-gray-600 dark:hover:text-gray-400 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs text-white dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-400 transition-colors" 
           >
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />

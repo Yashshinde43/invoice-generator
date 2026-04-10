@@ -343,7 +343,7 @@ export function SetupForm({ initialData, onComplete }: Props) {
             type="submit"
             size="lg"
             disabled={isPending}
-            className="w-full gap-2 h-12 text-base font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-500/25"
+            className="w-full gap-2 h-12 text-base font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
           >
             {isPending ? (
               <>

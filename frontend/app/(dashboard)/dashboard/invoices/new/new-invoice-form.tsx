@@ -131,7 +131,7 @@ export function NewInvoiceForm({ business, products }: Props) {
 
   const buildFormData = (data: FormValues, status: string) => {
     const fd = new FormData()
-    fd.append('customer_id',      selectedCustId || '')
+    fd.append('customer_id',      '')
     fd.append('customer_name',    data.customer_name)
     fd.append('customer_phone',   data.customer_phone   || '')
     fd.append('customer_address', data.customer_address || '')

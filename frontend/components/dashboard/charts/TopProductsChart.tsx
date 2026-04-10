@@ -30,7 +30,7 @@ const COLORS = [
   '#06b6d4', // cyan-500
   '#84cc16', // lime-500
   '#f97316', // orange-500
-  '#6366f1', // indigo-500
+  '#6366f1', // emerald-500
 ]
 
 export function TopProductsChart({ data, limit = 10 }: TopProductsChartProps) {
