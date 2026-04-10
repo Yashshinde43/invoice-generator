@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Wallet, Search, ArrowLeft, TrendingDown } from "lucide-react";
+import { Plus, Wallet, Search, ArrowLeft, TrendingDown, Pencil, Trash2, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -26,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { EXPENSE_CATEGORIES } from "@/types";
 import { formatExpenseCategory, formatCurrency } from "@/lib/utils";
 import Link from "next/link";
-import { Expense, getExpenses, getExpensesSummary } from "@/app/actions/expenses-firebase";
+import { Expense, getExpenses, getExpensesSummary, deleteExpense, updateExpense } from "@/app/actions/expenses-firebase";
 import { useToast } from "@/hooks/use-toast";
 
 function ExpensesTableSkeleton() {
@@ -67,15 +67,20 @@ function ExpensesContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [selectedMonth, setSelectedMonth] = useState("all");
-  const [selectedYear, setSelectedYear] = useState("all");
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedYear, setSelectedYear] = useState("");
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Generate options dynamically
   const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1; // getMonth() returns 0-11
+  const currentMonthString = currentMonth < 10 ? `0${currentMonth}` : `${currentMonth}`;
   const monthOptions = [
     { value: "all", label: "All Months" },
     { value: "01", label: "January" },
@@ -100,6 +105,9 @@ function ExpensesContent() {
   ];
 
   useEffect(() => {
+    // Set default month and year to current
+    setSelectedMonth(currentMonthString);
+    setSelectedYear(String(currentYear));
     fetchExpenses();
   }, []);
 
@@ -187,6 +195,56 @@ function ExpensesContent() {
   const handleNavigateToNewExpense = () => {
     setIsNavigating(true);
     router.push("/dashboard/expenses/new");
+  };
+
+  const handleEditExpense = (expenseId: string) => {
+    setIsNavigating(true);
+    router.push(`/dashboard/expenses/edit/${expenseId}`);
+  };
+
+  const handleDeleteExpense = (expense: Expense) => {
+    setExpenseToDelete(expense);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!expenseToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      const result = await deleteExpense(expenseToDelete.id);
+      
+      if (result.error) {
+        toast({
+          variant: "destructive",
+          title: "Error deleting expense",
+          description: result.error,
+        });
+      } else {
+        toast({
+          title: "Expense deleted successfully",
+          description: `"${expenseToDelete.description}" has been deleted.`,
+        });
+        // Refresh the expenses list
+        fetchExpenses();
+      }
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      toast({
+        variant: "destructive",
+        title: "Error deleting expense",
+        description: "An unexpected error occurred.",
+      });
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+      setExpenseToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setIsDeleteDialogOpen(false);
+    setExpenseToDelete(null);
   };
 
   return (
@@ -360,7 +418,7 @@ function ExpensesContent() {
                       <TableHead>Date</TableHead>
                       <TableHead className="text-right">Amount</TableHead>
                       <TableHead>Payment</TableHead>
-                      <TableHead className="text-right">View Bill</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -398,13 +456,35 @@ function ExpensesContent() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleViewExpense(expense)}
-                          >
-                            View
-                          </Button>
+                          <div className="flex justify-end gap-1">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleViewExpense(expense)}
+                              title="View Expense"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => handleEditExpense(expense.id)}
+                              title="Edit Expense"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              className="h-8 w-8 text-slate-400 hover:text-red-500 dark:hover:text-red-400"
+                              onClick={() => handleDeleteExpense(expense)}
+                              title="Delete Expense"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -676,6 +756,46 @@ function ExpensesContent() {
             className="max-w-[90vw] max-h-[90vh] rounded-lg shadow-2xl object-contain"
             onClick={(e) => e.stopPropagation()}
           />
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {isDeleteDialogOpen && expenseToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={cancelDelete}>
+          <div className="bg-white dark:bg-gray-900 rounded-lg max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="p-6 space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-2">
+                  Delete Expense
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Are you sure you want to delete &quot;{expenseToDelete.description}&quot;? This action cannot be undone.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={cancelDelete}
+                  disabled={isDeleting}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm"
+                  onClick={confirmDelete}
+                  disabled={isDeleting}
+                  className="gap-2"
+                >
+                  {isDeleting && (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  )}
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

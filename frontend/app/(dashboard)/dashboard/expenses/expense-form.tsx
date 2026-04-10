@@ -14,7 +14,8 @@ import { formatExpenseCategory, formatCurrency } from "@/lib/utils";
 import { ArrowLeft, Plus, Hash, CreditCard, Calendar, DollarSign, User, FileText, Building, Home, Wifi, Zap, Wrench, ShoppingCart, Gift } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { createExpense } from "@/app/actions/expenses-firebase";
+import { createExpense, updateExpense } from "@/app/actions/expenses-firebase";
+import { Expense } from "@/app/actions/expenses-firebase";
 import { useToast } from "@/hooks/use-toast";
 import { auth, storage, storageSDK } from "@/lib/firebase";
 
@@ -25,6 +26,8 @@ interface ExpenseFormProps {
     label: string;
     icon: string;
   };
+  mode?: 'create' | 'edit';
+  expense?: Expense;
 }
 
 interface FormData {
@@ -59,40 +62,125 @@ interface FormData {
   leasePeriod?: string;
 }
 
-export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
+export function ExpenseForm({ category, categoryData, mode = 'create', expense }: ExpenseFormProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const [formData, setFormData] = useState<FormData>({
-    amount: "",
-    expenseDate: new Date().toISOString().split('T')[0],
-    paymentMethod: "cash",
-    paymentStatus: "unpaid",
-    vendor: "",
-    reference: "",
-    notes: "",
-    receiptImage: null,
-    // Initialize category-specific fields
-    employeeName: "",
-    salaryMonth: "",
-    employeeId: "",
-    bonusType: "",
-    bonusMonth: "",
-    serviceProvider: "",
-    subscriptionType: "",
-    renewalDate: "",
-    serviceName: "",
-    items: "",
-    supplierName: "",
-    serviceType: "",
-    maintenanceDate: "",
-    providerName: "",
-    planType: "",
-    connectionType: "",
-    utilityType: "",
-    propertyAddress: "",
-    landlordName: "",
-    leasePeriod: "",
-  });
+  
+  // Initialize form data based on mode
+  const initializeFormData = (): FormData => {
+    if (mode === 'edit' && expense) {
+      const data: FormData = {
+        amount: expense.amount?.toString() || "",
+        expenseDate: expense.expense_date || new Date().toISOString().split('T')[0],
+        paymentMethod: expense.payment_method || "cash",
+        paymentStatus: (expense.payment_status as "paid" | "unpaid" | "pending") || "unpaid",
+        vendor: expense.vendor || "",
+        reference: expense.reference || "",
+        notes: expense.notes || "",
+        receiptImage: null,
+        // Initialize category-specific fields from expense data
+        employeeName: "",
+        salaryMonth: "",
+        employeeId: "",
+        bonusType: "",
+        bonusMonth: "",
+        serviceProvider: "",
+        subscriptionType: "",
+        renewalDate: "",
+        serviceName: "",
+        items: "",
+        supplierName: "",
+        serviceType: "",
+        maintenanceDate: "",
+        providerName: "",
+        planType: "",
+        connectionType: "",
+        utilityType: "",
+        propertyAddress: "",
+        landlordName: "",
+        leasePeriod: "",
+      };
+
+      // Populate category-specific fields based on category
+      switch (category) {
+        case 'salary_wages':
+          data.employeeName = expense.salary?.employee_name || "";
+          data.employeeId = expense.salary?.employee_id || "";
+          data.salaryMonth = expense.salary?.salary_month || "";
+          break;
+        case 'attendance':
+          data.employeeName = expense.bonus?.employee_name || "";
+          data.bonusType = expense.bonus?.bonus_type || "";
+          data.bonusMonth = expense.bonus?.bonus_month || "";
+          break;
+        case 'subscriptions':
+          data.serviceName = expense.subscription?.service_name || "";
+          data.serviceProvider = expense.subscription?.service_provider || "";
+          data.subscriptionType = expense.subscription?.subscription_type || "";
+          data.renewalDate = expense.subscription?.renewal_date || "";
+          break;
+        case 'office_supplies':
+          data.items = expense.office_supplies?.items || "";
+          data.supplierName = expense.office_supplies?.supplier_name || "";
+          break;
+        case 'office_maintenance':
+          data.serviceType = expense.office_maintenance?.service_type || "";
+          data.maintenanceDate = expense.office_maintenance?.maintenance_date || "";
+          data.serviceProvider = expense.office_maintenance?.service_provider || "";
+          break;
+        case 'wifi_internet':
+          data.providerName = expense.wifi_internet?.provider_name || "";
+          data.connectionType = expense.wifi_internet?.connection_type || "";
+          data.planType = expense.wifi_internet?.plan_type || "";
+          break;
+        case 'utilities':
+          data.utilityType = expense.utilities?.utility_type || "";
+          data.providerName = expense.utilities?.provider_name || "";
+          break;
+        case 'rent':
+          data.landlordName = expense.rent?.landlord_name || "";
+          data.propertyAddress = expense.rent?.property_address || "";
+          data.leasePeriod = expense.rent?.lease_period || "";
+          break;
+      }
+
+      return data;
+    }
+
+    // Default empty form for create mode
+    return {
+      amount: "",
+      expenseDate: new Date().toISOString().split('T')[0],
+      paymentMethod: "cash",
+      paymentStatus: "unpaid",
+      vendor: "",
+      reference: "",
+      notes: "",
+      receiptImage: null,
+      employeeName: "",
+      salaryMonth: "",
+      employeeId: "",
+      bonusType: "",
+      bonusMonth: "",
+      serviceProvider: "",
+      subscriptionType: "",
+      renewalDate: "",
+      serviceName: "",
+      items: "",
+      supplierName: "",
+      serviceType: "",
+      maintenanceDate: "",
+      providerName: "",
+      planType: "",
+      connectionType: "",
+      utilityType: "",
+      propertyAddress: "",
+      landlordName: "",
+      leasePeriod: "",
+    };
+  };
+
+  const [formData, setFormData] = useState<FormData>(initializeFormData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -103,6 +191,20 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
   const [facingMode, setFacingMode] = useState<"environment" | "user">("environment");
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  // If in edit mode with existing expense image, we don't require a new image
+  // unless the user wants to replace it
+  const isImageRequired = mode === 'create' || (mode === 'edit' && !expense?.image_url);
+
+  // Reinitialize form data when expense prop changes (for edit mode)
+  useEffect(() => {
+    if (mode === 'edit' && expense) {
+      console.log('📋 Editing expense:', expense);
+      const initializedData = initializeFormData();
+      console.log('📝 Initialized form data:', initializedData);
+      setFormData(initializedData);
+    }
+  }, [mode, expense, category]);
 
   // Clean up image preview URL when component unmounts
   useEffect(() => {
@@ -121,8 +223,8 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
       return false;
     }
 
-    // Check receipt image is required
-    if (!selectedImage) {
+    // Check receipt image is required only for create mode or if replacing in edit mode
+    if (isImageRequired && !selectedImage) {
       setValidationError("Receipt image is required");
       return false;
     }
@@ -234,8 +336,8 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
     setIsSubmitting(true);
 
     try {
-      // Upload receipt image client-side first (Firebase Storage is a client SDK)
-      let image_url = '';
+      // Upload receipt image client-side first (Firebase Storage is a client SDK) if a new image is provided
+      let image_url = expense?.image_url || ''; // Keep existing image URL if in edit mode and no new image
       if (selectedImage) {
         const uid = auth.currentUser?.uid;
         if (!uid) throw new Error('Not signed in. Please refresh and sign in again.');
@@ -257,7 +359,7 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
       if (formData.reference?.trim()) formDataObj.append('reference', formData.reference);
       if (formData.notes?.trim()) formDataObj.append('notes', formData.notes);
 
-      // Pass the already-uploaded image URL
+      // Pass the image URL (existing or newly uploaded)
       if (image_url) {
         formDataObj.append('image_url', image_url);
       }
@@ -314,18 +416,25 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
           break;
       }
 
-      // Call Firebase action
-      const result = await createExpense(formDataObj);
+      // Call appropriate Firebase action based on mode
+      let result;
+      if (mode === 'edit' && expense) {
+        formDataObj.append('expense_id', expense.id);
+        result = await updateExpense(formDataObj);
+      } else {
+        result = await createExpense(formDataObj);
+      }
 
       if (result.error) {
         throw new Error(result.error);
       }
 
       // Success
+      const action = mode === 'edit' ? 'updated' : 'added';
       toast({
         variant: "success",
-        title: "Expense added successfully!",
-        description: `${categoryData.label} expense has been recorded.`,
+        title: `Expense ${action} successfully!`,
+        description: `${categoryData.label} expense has been ${action}.`,
       });
 
       // Redirect to expenses list
@@ -345,9 +454,10 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
         }
       }
       
+      const action = mode === 'edit' ? 'update' : 'add';
       toast({
         variant: "destructive",
-        title: "Failed to add expense",
+        title: `Failed to ${action} expense`,
         description: errorMessage,
       });
     } finally {
@@ -934,6 +1044,18 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
     }
   };
 
+  // Determine UI text based on mode
+  const pageTitle = mode === 'edit' 
+    ? `Edit ${categoryData.label} Expense`
+    : `Add ${categoryData.label} Expense`;
+  const pageDescription = mode === 'edit'
+    ? `Update your ${categoryData.label.toLowerCase()} expense`
+    : `Track your ${categoryData.label.toLowerCase()} expenses`;
+  const buttonText = mode === 'edit' ? 'Update Expense' : 'Add Expense';
+  const submitText = isSubmitting 
+    ? (selectedImage ? "Uploading..." : (mode === 'edit' ? "Updating..." : "Adding..."))
+    : buttonText;
+
   return (
     <div className="space-y-6 pb-12">
       {/* Page header */}
@@ -943,9 +1065,9 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
         </Button>
         <div>
           <h1 className="text-3xl font-serif font-normal text-gray-900 dark:text-slate-100">
-            Add {categoryData.label} Expense
+            {pageTitle}
           </h1>
-          <p className="text-gray-500 mt-1">Track your {categoryData.label.toLowerCase()} expenses</p>
+          <p className="text-gray-500 mt-1">{pageDescription}</p>
         </div>
       </div>
 
@@ -1172,13 +1294,13 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
                   </p>
                 </div>
 
-                {/* Receipt Image Upload - REQUIRED */}
+                {/* Receipt Image Upload */}
                 <div>
                   <Label>
                     <svg className="h-3.5 w-3.5 inline mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    Receipt Image <span className="text-red-500">*</span>
+                    Receipt Image {isImageRequired && <span className="text-red-500">*</span>}
                   </Label>
                   {/* Hidden file input for gallery upload */}
                   <input
@@ -1213,7 +1335,10 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
                     </button>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    Upload from gallery or take a photo - Required
+                    {mode === 'edit' && expense?.image_url 
+                      ? "Upload from gallery or take a photo - Optional (leave empty to keep existing)"
+                      : "Upload from gallery or take a photo - Required"
+                    }
                   </p>
                   
                    {/* Image Preview Section - ALWAYS show when file is selected */}
@@ -1283,6 +1408,35 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
                            </div>
                          </div>
                        )}
+                    </div>
+                  )}
+                  
+                   {/* Show existing image info in edit mode */}
+                  {mode === 'edit' && expense?.image_url && !selectedImage && (
+                    <div className="mt-4 space-y-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <p className="text-xs text-gray-500">
+                        ℹ️ Current receipt image:
+                      </p>
+                      <div className="flex items-center gap-3">
+                        <div className="relative inline-block group flex-shrink-0">
+                          <img
+                            src={expense.image_url}
+                            alt="Current receipt"
+                            className="max-w-xs max-h-32 rounded-md shadow-sm border border-gray-300 object-contain cursor-zoom-in"
+                            title="Click to zoom current receipt"
+                            onClick={() => setLightboxUrl(expense.image_url!)}
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                              const errorMsg = document.createElement('p');
+                              errorMsg.className = 'text-xs text-gray-500';
+                              errorMsg.textContent = 'Unable to load current receipt image';
+                              target.parentElement?.appendChild(errorMsg);
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 italic">Upload a new file to replace this image</p>
                     </div>
                   )}
                 </div>
@@ -1372,12 +1526,12 @@ export function ExpenseForm({ category, categoryData }: ExpenseFormProps) {
                   {isSubmitting ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                      {selectedImage ? "Uploading..." : "Adding..."}
+                      {submitText}
                     </>
                   ) : (
                     <>
                       <Plus className="h-4 w-4" />
-                      Add Expense
+                      {buttonText}
                     </>
                   )}
                 </Button>

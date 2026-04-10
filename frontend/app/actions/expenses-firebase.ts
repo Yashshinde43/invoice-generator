@@ -414,3 +414,294 @@ export async function getExpensesSummary(): Promise<{
     return null
   }
 }
+
+export async function updateExpense(id: string, formData: FormData): Promise<SuccessResponse<{ id: string }> | ErrorResponse> {
+  try {
+    const userId = await getUserId()
+    const businessId = await getBusinessId()
+    
+    if (!userId || !businessId) {
+      console.error('Auth check failed - userId:', !!userId, 'businessId:', !!businessId)
+      throw new Error('Authentication required: Please sign in and set up your business first.')
+    }
+
+    // Verify expense exists and belongs to user's business
+    const existingExpense = await getExpense(id)
+    if (!existingExpense) {
+      throw new Error('Expense not found')
+    }
+    if (existingExpense.business_id !== businessId) {
+      throw new Error('Not authorized to edit this expense')
+    }
+
+    const category = formData.get('category') as string
+    const amount = parseFloat(formData.get('amount') as string)
+    const expense_date = formData.get('expense_date') as string
+    const payment_method = formData.get('payment_method') as string
+    const payment_status = formData.get('payment_status') as 'paid' | 'unpaid' | 'pending'
+    const vendor = (formData.get('vendor') as string) || ''
+    const reference = (formData.get('reference') as string) || ''
+    const notes = (formData.get('notes') as string) || ''
+    const image_url = (formData.get('image_url') as string) || ''
+
+    if (!category || !amount || !expense_date || !payment_method || !payment_status) {
+      throw new Error('Missing required fields')
+    }
+
+    const generateDescription = (): string => {
+      const empName = formData.get('employee_name') as string
+      const salaryMonth = formData.get('salary_month') as string
+      const bonusEmp = formData.get('employee_name') as string
+      const bonusType = formData.get('bonus_type') as string
+      const serviceName = formData.get('service_name') as string
+      const provider = formData.get('service_provider') as string
+      const items = formData.get('items') as string
+      const serviceType = formData.get('service_type') as string
+      const providerName = formData.get('provider_name') as string
+      const utilityType = formData.get('utility_type') as string
+      const landlord = formData.get('landlord_name') as string
+      const address = formData.get('property_address') as string
+
+      if (category === 'salary_wages') {
+        if (empName && empName.trim() && salaryMonth && salaryMonth.trim()) {
+          return 'Salary for ' + empName + ' - ' + salaryMonth
+        } else if (empName && empName.trim()) {
+          return 'Salary payment for ' + empName
+        }
+        return 'Salary payment'
+      }
+
+      if (category === 'attendance') {
+        if (bonusEmp && bonusEmp.trim() && bonusType && bonusType.trim()) {
+          return bonusType + ' bonus for ' + bonusEmp
+        } else if (bonusEmp && bonusEmp.trim()) {
+          return 'Bonus payment for ' + bonusEmp
+        }
+        return 'Attendance/Bonus payment'
+      }
+
+      if (category === 'subscriptions') {
+        if (serviceName && serviceName.trim()) {
+          return serviceName + ' subscription'
+        } else if (provider && provider.trim()) {
+          return 'Subscription payment to ' + provider
+        }
+        return 'Service subscription'
+      }
+
+      if (category === 'office_supplies') {
+        if (items && items.trim()) {
+          const itemList = items.length > 50 ? items.substring(0, 50) + '...' : items
+          return 'Office supplies: ' + itemList
+        }
+        return 'Office supplies purchase'
+      }
+
+      if (category === 'office_maintenance') {
+        if (serviceType && serviceType.trim()) {
+          return serviceType + ' maintenance'
+        }
+        return 'Office maintenance'
+      }
+
+      if (category === 'wifi_internet') {
+        if (providerName && providerName.trim()) {
+          return 'Internet service - ' + providerName
+        }
+        return 'WiFi/Internet service'
+      }
+
+      if (category === 'utilities') {
+        if (utilityType && utilityType.trim()) {
+          return utilityType + ' utility bill'
+        }
+        return 'Utilities payment'
+      }
+
+      if (category === 'rent') {
+        if (landlord && landlord.trim() && address && address.trim()) {
+          return 'Rent payment to ' + landlord
+        } else if (landlord && landlord.trim()) {
+          return 'Rent payment to ' + landlord
+        }
+        return 'Rent/Lease payment'
+      }
+
+      return category.replace('_', ' ') + ' expense'
+    }
+
+    const description = generateDescription()
+
+    const updateData: Partial<Expense> = {
+      category,
+      description,
+      amount,
+      expense_date,
+      payment_method,
+      payment_status,
+      vendor,
+      reference,
+      notes,
+      image_url: image_url || existingExpense.image_url || '',
+      updated_at: new Date().toISOString(),
+    }
+
+    switch (category) {
+      case 'salary_wages':
+        const employeeName = formData.get('employee_name') as string
+        const salaryMonth = formData.get('salary_month') as string
+        if (employeeName?.trim() || salaryMonth?.trim()) {
+          updateData.salary = {
+            employee_name: employeeName || '',
+            employee_id: (formData.get('employee_id') as string) || '',
+            salary_month: salaryMonth || '',
+          }
+        }
+        break
+
+      case 'attendance':
+        const bonusEmployeeName = formData.get('employee_name') as string
+        const bonusType = formData.get('bonus_type') as string
+        if (bonusEmployeeName?.trim() || bonusType?.trim()) {
+          updateData.bonus = {
+            employee_name: bonusEmployeeName || '',
+            bonus_type: bonusType || '',
+            bonus_month: (formData.get('bonus_month') as string) || '',
+          }
+        }
+        break
+
+      case 'subscriptions':
+        const serviceName = formData.get('service_name') as string
+        const serviceProvider = formData.get('service_provider') as string
+        const subscriptionType = formData.get('subscription_type') as string
+        if (serviceName?.trim() || serviceProvider?.trim() || subscriptionType?.trim()) {
+          updateData.subscription = {
+            service_name: serviceName || '',
+            service_provider: serviceProvider || '',
+            subscription_type: subscriptionType || '',
+            renewal_date: (formData.get('renewal_date') as string) || '',
+          }
+        }
+        break
+
+      case 'office_supplies':
+        const items = formData.get('items') as string
+        if (items?.trim()) {
+          updateData.office_supplies = {
+            items: items || '',
+            supplier_name: (formData.get('supplier_name') as string) || '',
+            reference: (formData.get('reference') as string) || '',
+          }
+        }
+        break
+
+      case 'office_maintenance':
+        const serviceType = formData.get('service_type') as string
+        if (serviceType?.trim()) {
+          updateData.office_maintenance = {
+            service_type: serviceType || '',
+            maintenance_date: (formData.get('maintenance_date') as string) || '',
+            service_provider: (formData.get('service_provider') as string) || '',
+          }
+        }
+        break
+
+      case 'wifi_internet':
+        const providerName = formData.get('provider_name') as string
+        if (providerName?.trim()) {
+          updateData.wifi_internet = {
+            provider_name: providerName || '',
+            connection_type: (formData.get('connection_type') as string) || '',
+            plan_type: (formData.get('plan_type') as string) || '',
+          }
+        }
+        break
+
+      case 'utilities':
+        const utilityType = formData.get('utility_type') as string
+        if (utilityType?.trim()) {
+          updateData.utilities = {
+            utility_type: utilityType || '',
+            provider_name: (formData.get('provider_name') as string) || '',
+          }
+        }
+        break
+
+      case 'rent':
+        const landlordName = formData.get('landlord_name') as string
+        const propertyAddress = formData.get('property_address') as string
+        const leasePeriod = formData.get('lease_period') as string
+        if (landlordName?.trim() || propertyAddress?.trim() || leasePeriod?.trim()) {
+          updateData.rent = {
+            property_address: propertyAddress || '',
+            landlord_name: landlordName || '',
+            lease_period: leasePeriod || '',
+            reference: (formData.get('reference') as string) || '',
+          }
+        }
+        break
+    }
+
+    const docRef = doc(collections.expenses, id)
+    await updateDoc(docRef, updateData)
+
+    // Revalidate paths
+    revalidatePath('/dashboard/expenses')
+    revalidatePath('/dashboard')
+
+    return {
+      data: { id },
+      error: null,
+    }
+  } catch (error) {
+    console.error('updateExpense error:', error)
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+    }
+  }
+}
+
+export async function deleteExpense(id: string): Promise<SuccessResponse<{ id: string }> | ErrorResponse> {
+  try {
+    const userId = await getUserId()
+    const businessId = await getBusinessId()
+    
+    if (!userId || !businessId) {
+      console.error('Auth check failed - userId:', !!userId, 'businessId:', !!businessId)
+      throw new Error('Authentication required: Please sign in and set up your business first.')
+    }
+
+    // Verify expense exists and belongs to user's business
+    const existingExpense = await getExpense(id)
+    if (!existingExpense) {
+      throw new Error('Expense not found')
+    }
+    if (existingExpense.business_id !== businessId) {
+      throw new Error('Not authorized to delete this expense')
+    }
+
+    // Soft delete by setting is_active to false instead of hard delete
+    const docRef = doc(collections.expenses, id)
+    await updateDoc(docRef, {
+      is_active: false,
+      updated_at: new Date().toISOString(),
+    })
+
+    // Revalidate paths
+    revalidatePath('/dashboard/expenses')
+    revalidatePath('/dashboard')
+
+    return {
+      data: { id },
+      error: null,
+    }
+  } catch (error) {
+    console.error('deleteExpense error:', error)
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+    }
+  }
+}
