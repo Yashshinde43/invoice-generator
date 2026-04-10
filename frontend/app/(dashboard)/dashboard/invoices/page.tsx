@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, FileText, Search, Download, Eye, Trash2, Loader2, ArrowLeft } from "lucide-react";
+import { Plus, FileText, Search, Download, Eye, Trash2, Loader2, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +29,13 @@ export default function InvoicesPage() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  const handleSearch = (v: string) => { setSearch(v); setPage(1); };
+  const handleStatusFilter = (v: string) => { setStatusFilter(v); setPage(1); };
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<Invoice | null>(null);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   useEffect(() => {
     getInvoices().then(data => {
@@ -50,18 +56,29 @@ export default function InvoicesPage() {
     return matchSearch && matchStatus;
   });
 
-  const handleDelete = async (id: string, num: string) => {
-    if (!confirm(`Delete invoice ${num}? This cannot be undone.`)) return;
-    setDeletingId(id);
-    const result = await deleteInvoice(id);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginated = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const handleDelete = (inv: Invoice) => {
+    setInvoiceToDelete(inv);
+  };
+
+  const confirmDelete = async () => {
+    if (!invoiceToDelete) return;
+    setDeletingId(invoiceToDelete.id);
+    const result = await deleteInvoice(invoiceToDelete.id);
     if (result.error) {
       toast({ variant: "destructive", title: "Delete failed", description: result.error });
     } else {
-      setInvoices(prev => prev.filter(i => i.id !== id));
-      toast({ title: "Invoice deleted", description: `${num} has been removed.` });
+      setInvoices(prev => prev.filter(i => i.id !== invoiceToDelete.id));
+      toast({ title: "Invoice deleted", description: `${invoiceToDelete.invoice_number} has been removed.` });
     }
     setDeletingId(null);
+    setInvoiceToDelete(null);
   };
+
+  const cancelDelete = () => setInvoiceToDelete(null);
 
   const totalAmount = filtered.reduce((s, i) => s + (i.total_amount || 0), 0);
   const paidCount = filtered.filter(i => i.payment_status === "paid" || i.status === "paid").length;
@@ -111,16 +128,16 @@ export default function InvoicesPage() {
           <Input
             placeholder="Search by invoice # or customer…"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => handleSearch(e.target.value)}
             className="pl-9"
           />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter} onValueChange={handleStatusFilter}>
           <SelectTrigger className="w-44">
-            <SelectValue placeholder="All statuses" />
+            <SelectValue placeholder="All status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="paid">Paid</SelectItem>
             <SelectItem value="sent">Sent</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
@@ -169,7 +186,7 @@ export default function InvoicesPage() {
             </div>
 
             <div className="divide-y divide-slate-100 dark:divide-white/[0.04]">
-              {filtered.map(inv => (
+              {paginated.map(inv => (
                 <div
                   key={inv.id}
                   className="grid grid-cols-1 sm:grid-cols-[1.5fr_1fr_1fr_1fr_auto] gap-3 sm:gap-4 items-center px-5 py-4 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors"
@@ -220,7 +237,7 @@ export default function InvoicesPage() {
                       className="h-8 w-8 text-slate-400 hover:text-red-500 dark:hover:text-red-400"
                       title="Delete invoice"
                       disabled={deletingId === inv.id}
-                      onClick={() => handleDelete(inv.id, inv.invoice_number)}
+                      onClick={() => handleDelete(inv)}
                     >
                       {deletingId === inv.id
                         ? <Loader2 className="h-4 w-4 animate-spin" />
@@ -234,10 +251,86 @@ export default function InvoicesPage() {
         )}
       </div>
 
-      <p className="text-xs text-slate-400 dark:text-slate-600 text-right">
-        {filtered.length} invoice{filtered.length !== 1 ? "s" : ""}
-        {invoices.length !== filtered.length ? ` of ${invoices.length}` : ""} shown
-      </p>
+      {/* Delete Confirmation Modal */}
+      {invoiceToDelete && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" onClick={cancelDelete}>
+          <div
+            className="bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-white/10 max-w-sm w-full p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Delete Invoice?</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Invoice <span className="font-medium text-slate-700 dark:text-slate-300">{invoiceToDelete.invoice_number}</span> will be permanently deleted.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={cancelDelete} disabled={!!deletingId}>
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={confirmDelete}
+                disabled={!!deletingId}
+                className="gap-2 bg-red-600 hover:bg-red-500 text-white border-0"
+              >
+                {deletingId && <Loader2 className="h-4 w-4 animate-spin" />}
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!isLoading && filtered.length > 0 && (
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={safePage === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+              .reduce<(number | "…")[]>((acc, p, i, arr) => {
+                if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("…");
+                acc.push(p);
+                return acc;
+              }, [])
+              .map((p, i) =>
+                p === "…" ? (
+                  <span key={`ellipsis-${i}`} className="text-xs text-slate-400 px-1">…</span>
+                ) : (
+                  <Button
+                    key={p}
+                    variant={safePage === p ? "default" : "outline"}
+                    size="icon"
+                    className={`h-8 w-8 text-xs ${safePage === p ? "bg-emerald-600 hover:bg-emerald-500 border-0 text-white" : ""}`}
+                    onClick={() => setPage(p as number)}
+                  >
+                    {p}
+                  </Button>
+                )
+              )}
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage === totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <p className="text-xs text-slate-400 dark:text-white">
+            Showing {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length} invoice{filtered.length !== 1 ? "s" : ""}
+            {invoices.length !== filtered.length ? ` (filtered from ${invoices.length})` : ""}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

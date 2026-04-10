@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Wallet, Search, ArrowLeft, TrendingDown, Pencil, Trash2, Eye } from "lucide-react";
+import { Plus, Wallet, Search, ArrowLeft, TrendingDown, Pencil, Trash2, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -76,6 +76,8 @@ function ExpensesContent() {
   const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   // Generate options dynamically
   const currentYear = new Date().getFullYear();
@@ -172,6 +174,12 @@ function ExpensesContent() {
     
     return matchesSearch && matchesCategory && matchesStatus && matchesDate;
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredExpenses.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginatedExpenses = filteredExpenses.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const resetPage = () => setPage(1);
 
   // Stats derived from filtered expenses so cards react to filters
   const filteredStats = {
@@ -346,10 +354,10 @@ function ExpensesContent() {
                 placeholder="Search expenses..."
                 className="pl-10"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => { setSearchTerm(e.target.value); resetPage(); }}
               />
             </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <Select value={selectedCategory} onValueChange={v => { setSelectedCategory(v); resetPage(); }}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Category" />
               </SelectTrigger>
@@ -362,7 +370,7 @@ function ExpensesContent() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+            <Select value={selectedStatus} onValueChange={v => { setSelectedStatus(v); resetPage(); }}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Payment Status" />
               </SelectTrigger>
@@ -373,7 +381,7 @@ function ExpensesContent() {
                 <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={selectedMonth} onValueChange={setSelectedMonth}>
+            <Select value={selectedMonth} onValueChange={v => { setSelectedMonth(v); resetPage(); }}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Month" />
               </SelectTrigger>
@@ -385,7 +393,7 @@ function ExpensesContent() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <Select value={selectedYear} onValueChange={v => { setSelectedYear(v); resetPage(); }}>
               <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Year" />
               </SelectTrigger>
@@ -422,7 +430,7 @@ function ExpensesContent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredExpenses.map((expense) => (
+                    {paginatedExpenses.map((expense) => (
                       <TableRow key={expense.id}>
                         <TableCell className="font-medium">
                           <div>
@@ -492,19 +500,54 @@ function ExpensesContent() {
                 </Table>
               </div>
 
-              {/* Summary */}
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-500">
-                  Showing {filteredExpenses.length} of {expenses.length} expenses
-                </p>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" disabled>
-                    Previous
+              {/* Pagination */}
+              <div className="flex flex-col items-center gap-2 pt-2">
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={safePage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" disabled>
-                    Next
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+                    .reduce<(number | "…")[]>((acc, p, i, arr) => {
+                      if (i > 0 && p - (arr[i - 1] as number) > 1) acc.push("…");
+                      acc.push(p);
+                      return acc;
+                    }, [])
+                    .map((p, i) =>
+                      p === "…" ? (
+                        <span key={`ellipsis-${i}`} className="text-xs text-slate-400 px-1">…</span>
+                      ) : (
+                        <Button
+                          key={p}
+                          variant={safePage === p ? "default" : "outline"}
+                          size="icon"
+                          className={`h-8 w-8 text-xs ${safePage === p ? "bg-emerald-600 hover:bg-emerald-500 border-0 text-white" : ""}`}
+                          onClick={() => setPage(p as number)}
+                        >
+                          {p}
+                        </Button>
+                      )
+                    )}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={safePage === totalPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
+                <p className="text-xs text-slate-400 dark:text-white">
+                  Showing {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filteredExpenses.length)} of {filteredExpenses.length} expense{filteredExpenses.length !== 1 ? "s" : ""}
+                  {expenses.length !== filteredExpenses.length ? ` (filtered from ${expenses.length})` : ""}
+                </p>
               </div>
             </div>
           )}
@@ -540,7 +583,7 @@ function ExpensesContent() {
 
       {/* View Expense Modal */}
       {isModalOpen && selectedExpense && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => { setIsModalOpen(false); setSelectedExpense(null); }}>
+        <div className="fixed top-0 left-0 right-0 bottom-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-[200] p-4" onClick={() => { setIsModalOpen(false); setSelectedExpense(null); }}>
           <div className="bg-white dark:bg-gray-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="p-6 space-y-6">
               {/* Header */}
@@ -738,7 +781,7 @@ function ExpensesContent() {
       {/* Lightbox */}
       {lightboxUrl && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          className="fixed top-0 left-0 right-0 bottom-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md"
           onClick={() => setLightboxUrl(null)}
         >
           <button
@@ -761,39 +804,28 @@ function ExpensesContent() {
 
       {/* Delete Confirmation Dialog */}
       {isDeleteDialogOpen && expenseToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={cancelDelete}>
-          <div className="bg-white dark:bg-gray-900 rounded-lg max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-            <div className="p-6 space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-2">
-                  Delete Expense
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Are you sure you want to delete &quot;{expenseToDelete.description}&quot;? This action cannot be undone.
-                </p>
-              </div>
-              <div className="flex justify-end gap-3">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={cancelDelete}
-                  disabled={isDeleting}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  variant="destructive" 
-                  size="sm"
-                  onClick={confirmDelete}
-                  disabled={isDeleting}
-                  className="gap-2"
-                >
-                  {isDeleting && (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  )}
-                  Delete
-                </Button>
-              </div>
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" onClick={cancelDelete}>
+          <div
+            className="bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-white/10 max-w-sm w-full p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Delete Expense?</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              &quot;{expenseToDelete.description}&quot; will be permanently deleted.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={cancelDelete} disabled={isDeleting}>
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="gap-2 bg-red-600 hover:bg-red-500 text-white border-0"
+              >
+                {isDeleting && <Loader2 className="h-4 w-4 animate-spin" />}
+                Delete
+              </Button>
             </div>
           </div>
         </div>

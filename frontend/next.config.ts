@@ -8,6 +8,7 @@ const cspHeader = `
   img-src 'self' blob: data: https://firebasestorage.googleapis.com https://*.googleapis.com https://*.google.com;
   font-src 'self' data:;
   connect-src 'self' https://firebasestorage.googleapis.com https://*.googleapis.com https://*.google.com;
+  frame-src blob:;
   frame-ancestors 'none';
   form-action 'self';
 `;

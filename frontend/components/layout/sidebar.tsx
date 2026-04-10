@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  Package,
   FileText,
   Settings,
   Menu,
@@ -20,7 +19,6 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Expenses",  href: "/dashboard/expenses", icon: Wallet },
   { name: "Invoices",  href: "/dashboard/invoices", icon: FileText },
-  { name: "Products",  href: "/dashboard/products", icon: Package },
   { name: "Settings",  href: "/dashboard/settings", icon: Settings },
 ];
 

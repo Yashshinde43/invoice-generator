@@ -5,7 +5,7 @@ import { ArrowLeft, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { getInvoice, getInvoicePDFData } from '@/app/actions/invoices-firebase'
-import { InvoicePDF } from '@/components/pdf/InvoicePDF'
+import { InvoicePDFPreview } from '@/components/pdf/InvoicePDFPreview'
 import { InvoicePDFButton } from '@/components/pdf/InvoicePDFButton'
 
 interface InvoiceDetailPageProps {
@@ -70,7 +70,7 @@ async function InvoiceDetailContent({ id }: { id: string }) {
 
       {/* PDF Preview */}
       {pdfDataResult.data && (
-        <InvoicePDF data={pdfDataResult.data} />
+        <InvoicePDFPreview data={pdfDataResult.data} />
       )}
     </div>
   )

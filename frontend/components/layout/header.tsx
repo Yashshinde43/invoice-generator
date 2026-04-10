@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Search, LogOut, Store, User, ChevronDown } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { LogOut, User, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,7 +24,6 @@ export function Header({
   userName = "User",
   userEmail = "",
 }: HeaderProps) {
-  const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
@@ -41,33 +38,6 @@ export function Header({
     <header className="sticky top-0 z-30 w-full h-16 flex items-center px-4 lg:px-6 gap-4
       bg-white/80 dark:bg-[hsl(var(--header-bg))]/90 backdrop-blur-md
       border-b border-slate-100 dark:border-white/[0.06]">
-
-      {/* Business selector */}
-      <button
-        onClick={() => router.push("/dashboard/setup")}
-        className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium
-          text-slate-600 dark:text-slate-400
-          border border-slate-200 dark:border-white/[0.08]
-          hover:bg-slate-50 dark:hover:bg-white/[0.04]
-          hover:text-slate-900 dark:hover:text-slate-200
-          transition-colors"
-      >
-        <Store className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
-        <span>{businessName}</span>
-        <ChevronDown className="h-3 w-3 text-slate-400 opacity-60" />
-      </button>
-
-      {/* Search */}
-      <div className="hidden sm:flex relative flex-1 max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 dark:text-slate-600" />
-        <Input
-          type="search"
-          placeholder="Search invoices, products…"
-          className="pl-9 h-9 text-sm bg-slate-50 dark:bg-white/[0.04] border-slate-200 dark:border-white/[0.08]
-            placeholder:text-slate-400 dark:placeholder:text-slate-600
-            focus-visible:ring-emerald-500/30"
-        />
-      </div>
 
       <div className="flex-1" />
 
@@ -99,12 +69,6 @@ export function Header({
               <p className="text-xs text-slate-500 dark:text-slate-500 truncate">{userEmail}</p>
             </div>
             <div className="py-1">
-              <DropdownMenuItem
-                onClick={() => router.push("/dashboard/setup")}
-                className="text-sm gap-2.5 text-slate-600 dark:text-slate-400 cursor-pointer"
-              >
-                <Store className="h-3.5 w-3.5" /> Store Settings
-              </DropdownMenuItem>
               <DropdownMenuItem className="text-sm gap-2.5 text-slate-600 dark:text-slate-400 cursor-pointer">
                 <User className="h-3.5 w-3.5" /> Profile
               </DropdownMenuItem>
